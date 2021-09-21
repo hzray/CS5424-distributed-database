@@ -1,5 +1,5 @@
-from general_query import *
-from datetime import datetime
+import cql
+from datetime import datetime, date
 
 
 def new_order_input_helper(n):
@@ -27,7 +27,7 @@ class OrderItem:
 
 
 class NewOrderHandler:
-    def __init__(self, cql_session, w_id, d_id, c_id, n_item):
+    def __init__(self, cql_session, c_id, w_id, d_id, n_item):
         self.session = cql_session
         self.w_id = w_id
         self.d_id = d_id
@@ -35,22 +35,9 @@ class NewOrderHandler:
         self.n_item = n_item
 
     def update_district_next_o_id(self, n):
-        self.session.execute("""
-                            UPDATE CS5424.district  
-                            SET d_next_o_id = %s
-                            WHERE d_w_id=%s AND d_id=%s
-                            """,
-                             [n, self.w_id, self.d_id])
-
-    def insert_order(self, o_id, w_id, d_id, c_id, n_items, all_local, t):
-        self.session.execute(
-            """
-            INSERT INTO 
-            CS5424.orders(o_w_id, o_d_id, o_id, o_c_id, o_carrier_id, o_ol_cnt, o_all_local, o_entry_d)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """,
-            [w_id, d_id, o_id, c_id, None, n_items, all_local, t]
-        )
+        query = "UPDATE CS5424.district SET d_next_o_id = %s WHERE d_w_id=%s AND d_id=%s"
+        args = [n, self.w_id, self.d_id]
+        cql.update(self.session, query, args)
 
     def update_stock(self, stock, w_id, quantity):
         qty = stock.s_quantity - quantity
@@ -63,33 +50,58 @@ class NewOrderHandler:
         if w_id != stock.s_w_id:
             remote_cnt += 1
 
-        self.session.execute(
-            """
-            UPDATE CS5424.stock
-            SET s_quantity = %s,
-                s_ytd =  %s,
-                s_order_cnt = %s,
-                s_remote_cnt = %s            
-            WHERE s_w_id = %s AND s_i_id = %s
-            """,
-            [qty, ytd, order_cnt, remote_cnt, stock.s_w_id, stock.s_i_id]
-        )
+        query = "UPDATE CS5424.stock SET s_quantity = %s, s_ytd =  %s, s_order_cnt = %s, s_remote_cnt = %s " \
+                "WHERE s_w_id = %s AND s_i_id = %s"
+        args = [qty, ytd, order_cnt, remote_cnt, stock.s_w_id, stock.s_i_id]
+        cql.update(self.session, query, args)
         return qty
 
-    def insert_order_line(self, n, d_id, w_id, i, i_id, sup_id, qty, item_amount, dist_info):
-        self.session.execute(
-            """
-            INSERT INTO 
-            CS5424.order_line(ol_w_id, ol_d_id, ol_o_id, ol_number, ol_i_id, ol_delivery_d, ol_amount, 
+    def insert_order_line(self, o_id, i, i_id, t, sup_id, qty, item_amount, dist_info):
+        query = """
+                    INSERT INTO 
+                    CS5424.order_line(ol_w_id, ol_d_id, ol_o_id, ol_number, ol_i_id, ol_delivery_d, ol_amount, 
                                 ol_supply_w_id, ol_quantity, ol_dist_info)
-            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """,
-            [w_id, d_id, n, i, i_id, None, item_amount, sup_id, qty, dist_info])
+                    VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """
+        args = [self.w_id, self.d_id, o_id, i, i_id, t, item_amount, sup_id, qty, dist_info]
+        cql.insert(self.session, query, args)
+
+    def insert_order(self, o_id, all_local, t):
+        query = "INSERT INTO " \
+                "CS5424.orders(o_w_id, o_d_id, o_id, o_c_id, o_carrier_id, o_ol_cnt, o_all_local, o_entry_d) " \
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        args = [self.w_id, self.d_id, o_id, self.c_id, 'unknown', self.n_item, all_local, t]
+        cql.insert(self.session, query, args)
+
+    def select_district(self):
+        query = "SELECT * FROM CS5424.district WHERE d_w_id=%s AND d_id=%s"
+        args = [self.w_id, self.d_id]
+        return cql.select_one(self.session, query, args)
+
+    def select_item(self, i_id):
+        query = "SELECT * FROM CS5424.item WHERE i_id=%s"
+        args = [i_id]
+        return cql.select_one(self.session, query, args)
+
+    def select_stock(self, sup_id, i_id):
+        query = "SELECT * FROM CS5424.stock WHERE s_w_id=%s AND s_i_id=%s"
+        args = [sup_id, i_id]
+        return cql.select_one(self.session, query, args)
+
+    def select_warehouse(self):
+        query = "SELECT * FROM CS5424.warehouse where w_id = %s"
+        args = [self.w_id]
+        return cql.select_one(self.session, query, args)
+
+    def select_customer(self):
+        query = "SELECT * FROM CS5424.customer WHERE c_w_id = %s and c_d_id = %s and c_id = %s"
+        args = [self.w_id, self.d_id, self.c_id]
+        return cql.select_one(self.session, query, args)
 
     def create_new_order(self):
         items = new_order_input_helper(self.n_item)
         # Step 1
-        district = get_district(self.session, self.w_id, self.d_id)
+        district = self.select_district()
         o_id = district.d_next_o_id
 
         # Step 2
@@ -103,18 +115,21 @@ class NewOrderHandler:
                 break
 
         t = datetime.now()
-        insert_order(self.session, o_id, self.w_id, self.d_id, self.c_id, self.n_item, all_local, t, None)
+        self.insert_order(o_id, all_local, t)
 
         # Step 4
         total_amount = 0
 
         # Step 5
-        i = 0
+        i = 1
         for item in items:
-            item_info = get_item(self.session, item.Id)
+            item_info = self.select_item(item.Id)
             item.price = item_info.i_price
             item.name = item_info.i_name
-            stock = get_stock(self.session, item.supplier_id, item.Id)
+
+
+            stock = self.select_stock(item.supplier_id, item.Id)
+
             adjusted_quantity = self.update_stock(stock, self.w_id, item.quantity)
             item.stock_quantity = adjusted_quantity
 
@@ -125,13 +140,15 @@ class NewOrderHandler:
             d_id_str = str(self.d_id)
             d_id_str = d_id_str.zfill(2)
             dist_info = getattr(stock, 's_dist_' + d_id_str)
-            insert_order_line(self.session, o_id, self.d_id, self.w_id, i, item.Id, item.supplier_id,
-                              item.quantity, item_amount, dist_info, None)
+
+            self.insert_order_line(o_id, i, item.Id, datetime(1970, 1, 1, 0, 0), item.supplier_id, item.quantity,
+                                   item_amount, dist_info)
+
             i += 1
 
         # Step 6
-        warehouse = get_warehouse(self.session, self.w_id)
-        customer = get_customer(self.session, self.w_id, self.d_id, self.c_id)
+        warehouse = self.select_warehouse()
+        customer = self.select_customer()
         c_discount = customer.c_discount
         total_amount = total_amount * (1 + district.d_tax + warehouse.w_tax) * (1 - c_discount)
 
