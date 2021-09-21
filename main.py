@@ -1,3 +1,4 @@
+import Delivery
 import NewOrder
 from cassandra.cluster import Cluster
 
@@ -12,11 +13,12 @@ def main():
         if command == 'N':
             new_order_args = [int(x) for x in args[1:]]
             new_order_handler = NewOrder.NewOrderHandler(session, *new_order_args)
-            new_order_handler.create_new_order()
+            new_order_handler.run()
         elif command == 'P':
             print("")
         elif command == 'D':
-            print("")
+            delivery_handler = Delivery.DeliveryHandler(session, int(args[1]), args[2])
+            delivery_handler.run()
         elif command == 'O':
             print("")
         elif command == 'S':

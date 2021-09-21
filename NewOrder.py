@@ -1,5 +1,5 @@
 import cql
-from datetime import datetime, date
+from datetime import datetime
 
 
 def new_order_input_helper(n):
@@ -98,7 +98,7 @@ class NewOrderHandler:
         args = [self.w_id, self.d_id, self.c_id]
         return cql.select_one(self.session, query, args)
 
-    def create_new_order(self):
+    def run(self):
         items = new_order_input_helper(self.n_item)
         # Step 1
         district = self.select_district()
@@ -114,8 +114,7 @@ class NewOrderHandler:
                 all_local = 0
                 break
 
-        t = datetime.now()
-        self.insert_order(o_id, all_local, t)
+        self.insert_order(o_id, all_local, datetime.now())
 
         # Step 4
         total_amount = 0
@@ -126,7 +125,6 @@ class NewOrderHandler:
             item_info = self.select_item(item.Id)
             item.price = item_info.i_price
             item.name = item_info.i_name
-
 
             stock = self.select_stock(item.supplier_id, item.Id)
 
