@@ -2,6 +2,8 @@ import Delivery
 import NewOrder
 from cassandra.cluster import Cluster
 
+import StockLevel
+
 
 def main():
     cluster = Cluster()
@@ -22,7 +24,9 @@ def main():
         elif command == 'O':
             print("")
         elif command == 'S':
-            print("")
+            stock_args = [int(x) for x in args[1:]]
+            stock_handler = StockLevel.StockLevelHandler(session, *stock_args)
+            stock_handler.run()
         elif command == 'I':
             print("")
         elif command == 'T':
