@@ -1,8 +1,6 @@
-import Delivery
-import NewOrder
-from cassandra.cluster import Cluster
+from transactions import NewOrder, Delivery, Payment, OrderStatus, StockLevel
 
-import StockLevel
+from cassandra.cluster import Cluster
 
 
 def main():
@@ -14,15 +12,23 @@ def main():
         command = args[0]
         if command == 'N':
             new_order_args = [int(x) for x in args[1:]]
+            # [c_id, w_id, d_id, M]
             new_order_handler = NewOrder.NewOrderHandler(session, *new_order_args)
             new_order_handler.run()
         elif command == 'P':
-            print("")
+            payment_args = [int(x) for x in args[1:]]
+            # [c_w_id, c_d_id, c_id, payment]
+            payment_handler = Payment.PaymentHandler(session, *payment_args)
+            payment_handler.run()
         elif command == 'D':
-            delivery_handler = Delivery.DeliveryHandler(session, int(args[1]), args[2])
+            # [w_id, carrier_id]
+            delivery_args = [int(x) for x in args[1:]]
+            delivery_handler = Delivery.DeliveryHandler(session, *delivery_args)
             delivery_handler.run()
         elif command == 'O':
-            print("")
+            order_status_args = [int(x) for x in args[1:]]
+            order_status_handler = OrderStatus.OrderStatusHandler(session, *order_status_args)
+            order_status_handler.run()
         elif command == 'S':
             stock_args = [int(x) for x in args[1:]]
             stock_handler = StockLevel.StockLevelHandler(session, *stock_args)
