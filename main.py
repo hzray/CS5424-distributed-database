@@ -1,4 +1,4 @@
-from transactions import NewOrder, Delivery, Payment, OrderStatus, StockLevel
+from transactions import NewOrder, Delivery, Payment, OrderStatus, StockLevel, PopularItem
 
 from cassandra.cluster import Cluster
 
@@ -34,7 +34,9 @@ def main():
             stock_handler = StockLevel.StockLevelHandler(session, *stock_args)
             stock_handler.run()
         elif command == 'I':
-            print("")
+            pop_item_args = [int(x) for x in args[1:]]
+            pop_item_handler = PopularItem.PopularItemHandler(session, *pop_item_args)
+            pop_item_handler.run()
         elif command == 'T':
             print("")
         elif command == 'R':
