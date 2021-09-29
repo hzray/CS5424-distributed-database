@@ -9,7 +9,7 @@ class RelatedCustomerHandler:
         self.c_id = c_id
 
     def findAllCustomerItems(self, w_id, d_id, c_id):
-        query = "SELECT * FROM CS5424.customer_order_items WHERE co_w_id = %s AND co_d_id = %s AND co_c_id = %s"
+        query = "SELECT * FROM CS5424.customer_order_items WHERE coi_w_id = %s AND coi_d_id = %s AND coi_c_id = %s"
         args = [w_id, d_id, c_id]
         orders = cql.select(self.session, query, args)
         items_by_order = []
