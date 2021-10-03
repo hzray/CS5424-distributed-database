@@ -9,12 +9,12 @@ class RelatedCustomerHandler:
         self.c_id = c_id
 
     def findAllCustomerItems(self, w_id, d_id, c_id):
-        query = "SELECT * FROM CS5424.customer_order_items WHERE coi_w_id = %s AND coi_d_id = %s AND coi_c_id = %s"
+        query = "SELECT * FROM CS5424.customer_order_items WHERE col_w_id = %s AND col_d_id = %s AND col_c_id = %s"
         args = [w_id, d_id, c_id]
         orders = cql.select(self.session, query, args)
         items_by_order = []
         for order in orders:
-            items_by_order.append(order.item)
+            items_by_order.append(order.col_i_ids)
         return items_by_order
 
     def findAllCustomers(self, w_id, d_id):
@@ -43,6 +43,8 @@ class RelatedCustomerHandler:
                 for customer in customers:
                     customer_items = self.findAllCustomerItems(self.w_id, self.d_id, customer.c_id)
                     if self.isRelatedCustomer(target_items, customer_items):
-                        print("W_id = {}, D_ID = {}, C_ID={}".format(self.w_id, self.d_id, customer.c_id))
+                        print("W_id = {}, D_ID = {}, C_ID={}".format(customer.c_w_id, customer.c_d_id, customer.c_id))
+
+
 
 
