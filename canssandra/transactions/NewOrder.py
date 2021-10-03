@@ -66,11 +66,11 @@ class NewOrderHandler:
         args = [w_id, d_id, o_id, i, i_id, t, item_amount, sup_id, qty, dist_info]
         cql.insert(self.session, query, args)
 
-    def insert_order(self, w_id, d_id, c_id,  o_id, all_local, t):
+    def insert_order(self, w_id, d_id, c_id, o_id, all_local, t):
         query = "INSERT INTO " \
                 "CS5424.orders(o_w_id, o_d_id, o_id, o_c_id, o_carrier_id, o_ol_cnt, o_all_local, o_entry_d) " \
                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        args = [w_id, d_id, o_id, c_id, 'unknown', self.n_item, all_local, t]
+        args = [w_id, d_id, o_id, c_id, -1, self.n_item, all_local, t]
         cql.insert(self.session, query, args)
 
     def select_district(self, w_id, d_id):
@@ -97,6 +97,12 @@ class NewOrderHandler:
         query = "SELECT * FROM CS5424.customer WHERE c_w_id = %s and c_d_id = %s and c_id = %s"
         args = [w_id, d_id, c_id]
         return cql.select_one(self.session, query, args)
+
+    def insert_customer_order_items(self, w_id, d_id, c_id, o_id, i_ids):
+        query = "INSERT INTO CS5424.customer_order_items(col_w_id, col_d_id, col_c_id, col_o_id, col_i_ids) " \
+                "VALUES(%s, %s, %s, %s, %s)"
+        args = [w_id, d_id, c_id, o_id, i_ids]
+        cql.insert(self.session, query, args)
 
     def run(self):
         items = new_order_input_helper(self.n_item)
@@ -172,3 +178,9 @@ class NewOrderHandler:
                                                 item.price * item.quantity,
                                                 item.stock_quantity)
             print(item_str)
+
+        # Insert into customer_order_items
+        item_ids = [item.Id for item in items]
+        self.insert_customer_order_items(self.w_id, self.d_id, self.c_id, o_id, item_ids)
+
+
