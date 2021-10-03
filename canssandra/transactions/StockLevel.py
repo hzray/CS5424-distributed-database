@@ -1,4 +1,4 @@
-import cql
+from canssandra import cql
 
 
 class StockLevelHandler:

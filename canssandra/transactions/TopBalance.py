@@ -1,4 +1,5 @@
-import cql
+from canssandra import cql
+
 
 class TopBalanceHandler:
     def __init__(self, cql_session):

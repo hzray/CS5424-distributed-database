@@ -1,4 +1,4 @@
-import cql
+from canssandra import cql
 from datetime import datetime
 
 
