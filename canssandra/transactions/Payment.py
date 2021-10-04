@@ -77,7 +77,7 @@ class PaymentHandler:
 
         print(district_address)
 
-        print("payment = " + self.payment)
+        print("payment = {}".format(self.payment))
 
 
 
