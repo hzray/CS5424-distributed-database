@@ -8,9 +8,9 @@ class DeliveryHandler:
         self.w_id = w_id
         self.carrier_id = carrier_id
 
-    def find_smallest_order(self, d_id):
+    def find_smallest_order(self, w_id, d_id):
         query = "SELECT * FROM CS5424.orders WHERE o_w_id = %s and o_d_id = %s and o_carrier_id = %s"
-        args = [self.w_id, d_id, -1]
+        args = [w_id, d_id, -1]
         return cql.select_one(self.session, query, args)
 
     def update_order_carrier_id(self, w_id, d_id, o_id, carrier_id):
@@ -51,8 +51,9 @@ class DeliveryHandler:
 
     def run(self):
         for d_id in range(1, 11):
-            smallest_order = self.find_smallest_order(d_id)
+            smallest_order = self.find_smallest_order(self.w_id, d_id)
             o_id = smallest_order.o_id
+            print("w_id = {}, d_id={}, o_id={}".format(self.w_id, d_id, o_id))
             self.update_order_carrier_id(self.w_id, d_id, o_id, self.carrier_id)
 
             order_lines = self.select_order_line(self.w_id, d_id, o_id)
