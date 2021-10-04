@@ -14,14 +14,14 @@ class PopularItemHandler:
         return cql.select_one(self.session, query, args)
 
     def find_last_n_orders(self, w_id, d_id, bot, top):
-        query = "SELECT * FROM CS5424.orders WHERE o_w_id = %s AND o_d_id = %s AND o_id >= %s AND ol_id < %s"
+        query = "SELECT * FROM CS5424.orders WHERE o_w_id = %s AND o_d_id = %s AND o_id >= %s AND o_id < %s"
         args = [w_id, d_id, bot, top]
-        return cql.select(self.session, query, args)
+        return list(cql.select(self.session, query, args))
 
-    def select_order_line(self, w_id, d_id, o_id):
+    def select_order_lines(self, w_id, d_id, o_id):
         query = "SELECT * FROM CS5424.order_line where ol_w_id = %s AND ol_d_id = %s AND ol_o_id = %s"
         args = [w_id, d_id, o_id]
-        return cql.select(self.session, query, args)
+        return list(cql.select(self.session, query, args))
 
     def select_customer(self, w_id, d_id, c_id):
         query = "SELECT * FROM CS5424.customer WHERE c_w_id = %s and c_d_id = %s and c_id = %s"
@@ -38,10 +38,13 @@ class PopularItemHandler:
         next_o_id = district.d_next_o_id
         orders = self.find_last_n_orders(self.w_id, self.d_id, next_o_id - self.n, next_o_id)
 
+        print("next_o_id = {}".format(next_o_id))
+
         pop_order_lines = []
         order_lines_list = []
         for order in orders:
-            order_lines = self.select_order_line(self.w_id, self.d_id, order.o_id)
+            print("check")
+            order_lines = self.select_order_lines(self.w_id, self.d_id, order.o_id)
             order_lines_list.append(order_lines)
             max_amount = 0
             for order_line in order_lines:
@@ -57,12 +60,13 @@ class PopularItemHandler:
 
         # output
         print("W_ID = {}, D_ID = {}".format(self.w_id, self.d_id))
-        print("L = " + self.n)
+        print("L = {}".format(self.n))
 
         pop_item_names = []
         pop_items = []
-        for i in range(0, len(orders)):
-            order = orders[i]
+
+        i = 0
+        for order in orders:
             print("O_ID = {}, O_ENTRY_D = {}".format(order.o_id, order.o_entry_d))
             customer = self.select_customer(self.w_id, self.d_id, order.o_c_id)
             print(
@@ -74,7 +78,8 @@ class PopularItemHandler:
                 if item.i_name not in pop_item_names:
                     pop_item_names.append(item.i_name)
                     pop_items.append((item.i_id, item.i_name))
-                print("I_NAME = {}, OL_QUANTITY = {}", item.i_name, pop_ol.ol_quantity)
+                print("I_NAME = {}, OL_QUANTITY = {}".format(item.i_name, pop_ol.ol_quantity))
+            i += 1
 
         for (i_id, i_name) in pop_items:
             count = 0
@@ -82,4 +87,4 @@ class PopularItemHandler:
                 for order_line in order_lines:
                     if order_line.ol_i_id == i_id:
                         count += 1
-            print("I_NAME = {}, Percentage = {}".format(i_name, count/self.n))
+            print("I_NAME = {}, Percentage = {}".format(i_name, count / self.n))

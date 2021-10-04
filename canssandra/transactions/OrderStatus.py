@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from canssandra import cql
 
 
@@ -42,10 +44,15 @@ class OrderStatusHandler:
         # Step 3
         order_lines = self.select_order_line(self.w_id, self.d_id, last_order.o_id)
         for order_line in order_lines:
+
+            delivery_date = order_line.ol_delivery_d
+            if delivery_date == datetime(1970, 1, 1, 0, 0):
+                delivery_date = "has not been delivered"
+
             order_line_output = "OL_I_ID = {}, OL_SUPPY_W_ID = {}, OL_QUANTITY = {}, OL_AMOUNT = {}, " \
                                 "OL_DELIVERY_D = {}".format(order_line.ol_i_id, order_line.ol_supply_w_id,
                                                             order_line.ol_quantity, order_line.ol_amount,
-                                                            order_line.ol_delivery_d)
+                                                            delivery_date)
             print(order_line_output)
 
 
