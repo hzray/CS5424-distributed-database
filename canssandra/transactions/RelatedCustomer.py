@@ -22,7 +22,7 @@ class RelatedCustomerHandler:
         orders = cql.select(self.session, self.query.select_customer_order_items, args)
         items_by_order = []
         for order in orders:
-            items_by_order.append(order.col_i_ids)
+            items_by_order.append(order.coi_i_ids)
         return items_by_order
 
     def findAllCustomers(self, w_id, d_id):

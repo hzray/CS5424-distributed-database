@@ -84,7 +84,7 @@ class NewOrderHandler:
 
     def insert_customer_order_items(self, w_id, d_id, c_id, o_id, i_ids):
         args = [w_id, d_id, c_id, o_id, i_ids]
-        cql.insert(self.session, self.query.insert_col, args)
+        cql.insert(self.session, self.query.insert_coi, args)
 
     def run(self):
         items = new_order_input_helper(self.n_item)

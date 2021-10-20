@@ -29,8 +29,8 @@ insert_order = "INSERT INTO " \
                "CS5424.orders(o_w_id, o_d_id, o_id, o_c_id, o_carrier_id, o_ol_cnt, o_all_local, o_entry_d) " \
                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 
-insert_customer_order_items = "INSERT INTO CS5424.customer_order_items(col_w_id, col_d_id, col_c_id, col_o_id, " \
-                              "col_i_ids) VALUES(?, ?, ?, ?, ?)"
+insert_customer_order_items = "INSERT INTO CS5424.customer_order_items(coi_w_id, coi_d_id, coi_c_id, coi_o_id, " \
+                              "coi_i_ids) VALUES(?, ?, ?, ?, ?)"
 
 select_district = "SELECT * FROM CS5424.district WHERE d_w_id = ? AND d_id = ?"
 
@@ -54,6 +54,6 @@ select_order_in_range = "SELECT * FROM CS5424.orders WHERE o_w_id = ? AND o_d_id
 
 select_customer_sort_by_balance = "SELECT * FROM CS5424.customer_balance WHERE c_w_id = ? AND c_d_id = ? LIMIT ?"
 
-select_customer_order_items = "SELECT * FROM CS5424.customer_order_items WHERE col_w_id = ? AND col_d_id = ? AND col_c_id = ?"
+select_customer_order_items = "SELECT * FROM CS5424.customer_order_items WHERE coi_w_id = ? AND coi_d_id = ? AND coi_c_id = ?"
 
 select_customer_by_district =  "SELECT * FROM CS5424.customer WHERE c_w_id = ? AND c_d_id = ?"
