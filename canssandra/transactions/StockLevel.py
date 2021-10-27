@@ -5,10 +5,10 @@ class StockLevelHandler:
     def __init__(self, cql_session, query, w_id, d_id, threshold, n_orders):
         self.session = cql_session
         self.query = query
-        self.w_id = w_id
-        self.d_id = d_id
-        self.threshold = threshold
-        self.n_orders = n_orders
+        self.w_id = int(w_id)
+        self.d_id = int(d_id)
+        self.threshold = int(threshold)
+        self.n_orders = int(n_orders)
 
     def select_district(self, w_id, d_id):
         args = [w_id, d_id]

@@ -1,3 +1,5 @@
+import decimal
+
 from canssandra import cql
 
 
@@ -5,10 +7,10 @@ class PaymentHandler:
     def __init__(self, cql_session, query, w_id, d_id, c_id, payment):
         self.session = cql_session
         self.query = query
-        self.w_id = w_id
-        self.d_id = d_id
-        self.c_id = c_id
-        self.payment = payment
+        self.w_id = int(w_id)
+        self.d_id = int(d_id)
+        self.c_id = int(c_id)
+        self.payment = decimal.Decimal(payment)
 
     def select_warehouse(self, w_id):
         args = [w_id]

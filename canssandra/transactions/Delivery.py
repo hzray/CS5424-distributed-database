@@ -6,8 +6,8 @@ class DeliveryHandler:
     def __init__(self, cql_session, query, w_id, carrier_id):
         self.session = cql_session
         self.query = query
-        self.w_id = w_id
-        self.carrier_id = carrier_id
+        self.w_id = int(w_id)
+        self.carrier_id = int(carrier_id)
 
     def find_smallest_order(self, w_id, d_id):
         args = [w_id, d_id, -1]

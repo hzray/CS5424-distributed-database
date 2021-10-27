@@ -1,13 +1,10 @@
 from canssandra import cql
 from datetime import datetime
-from canssandra import QueryPrepare
 
-
-def new_order_input_helper(n):
+def new_order_input_helper(n, file):
     items = []
     for i in range(0, n):
-        line = input(
-            "enter information for item{} in format [OL_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY]\n".format(i + 1))
+        line = file.readline()
         info = line.split(",")
         items.append(OrderItem(int(info[0]), int(info[1]), int(info[2])))
     return items
@@ -28,13 +25,14 @@ class OrderItem:
 
 
 class NewOrderHandler:
-    def __init__(self, cql_session, query, c_id, w_id, d_id, n_item):
+    def __init__(self, cql_session, query, file, c_id, w_id, d_id, n_item):
         self.session = cql_session
         self.query = query
-        self.w_id = w_id
-        self.d_id = d_id
-        self.c_id = c_id
-        self.n_item = n_item
+        self.file = file
+        self.w_id = int(w_id)
+        self.d_id = int(d_id)
+        self.c_id = int(c_id)
+        self.n_item = int(n_item)
 
     def update_district_next_o_id(self, w_id, d_id, n):
         args = [n, w_id, d_id]
@@ -82,12 +80,16 @@ class NewOrderHandler:
         args = [w_id, d_id, c_id]
         return cql.select_one(self.session, self.query.select_customer, args)
 
-    def insert_customer_order_items(self, w_id, d_id, c_id, o_id, i_ids):
-        args = [w_id, d_id, c_id, o_id, i_ids]
+    def insert_customer_order_items(self, w_id, d_id, c_id, o_id, i_id):
+        args = [w_id, d_id, c_id, o_id, i_id]
         cql.insert(self.session, self.query.insert_coi, args)
 
+    def insert_customer_order(self, w_id, d_id, c_id, o_id, i_ids):
+        args = [w_id, d_id, c_id, o_id, i_ids]
+        cql.insert(self.session, self.query.insert_co, args)
+
     def run(self):
-        items = new_order_input_helper(self.n_item)
+        items = new_order_input_helper(self.n_item, self.file)
         # Step 1
         district = self.select_district(self.w_id, self.d_id)
         o_id = district.d_next_o_id
@@ -163,5 +165,9 @@ class NewOrderHandler:
             print(item_str)
 
         # Insert into customer_order_items
+        for item in items:
+            self.insert_customer_order_items(self.w_id, self.d_id, self.c_id, o_id, item.Id)
+
+        # Insert into customer_order
         item_ids = [item.Id for item in items]
-        self.insert_customer_order_items(self.w_id, self.d_id, self.c_id, o_id, item_ids)
+        self.insert_customer_order(self.w_id, self.d_id, self.c_id, o_id, item_ids)
