@@ -55,4 +55,37 @@ This table has fields
 
 
 
- 
+####  How these two tables help process Related_Customer?
+
+Normally, if we use brutal force to find related customers of customer A, we would 
+
+~~~cassandra
+	1. looking into all orders of customer A, and find what items are in the order.
+  2. for each order OA of customer A,
+			for each warehouse:
+				for each district:
+					for each customer B:
+						for each customer's order OB:
+              check if OA and OB has more than 2 items in common, if so A and B are related customer
+~~~
+
+The step 2 can be inefficient and time consuming if we mereply reply on programming language to check if OA and OB has common items.                
+               
+The table `customer_order` help to simplify step 1, so we can easily retrieve all orders of a customer, and items in each order (in a list format)
+
+
+The table `customer_order_items` help to improve step 2:
+
+~~~cassandra
+for each order OA of customer A
+	for each warehoue w :
+		for each district d:
+			select * from customer_order_items where w_id=w and d_id=d and i_id in (OA.items)
+			keep these rows whose order number appear more than once ...	
+      customers associated with these order numbers are related customers to A  
+~~~
+
+
+
+The database keyword `in` can help us to get better performance.
+To maintain these two tables, we need to update them when processing NewOrder Transaction.
