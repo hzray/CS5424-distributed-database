@@ -10,6 +10,3 @@ COPY CS5424.ITEM (I_ID, I_NAME, I_PRICE, I_IM_ID, I_DATA) FROM '~/Desktop/projec
 
 COPY CS5424.ORDER_LINE (OL_W_ID, OL_D_ID, OL_O_ID, OL_NUMBER, OL_I_ID, OL_DELIVERY_D, OL_AMOUNT, OL_SUPPLY_W_ID, OL_QUANTITY, OL_DIST_INFO) FROM '~/Desktop/project_files_4/data_files/order-line.csv' WITH HEADER=TRUE;
 
-COPY CS5424.STOCK (S_W_ID, S_I_ID, S_QUANTITY, S_YTD, S_ORDER_CNT, S_REMOTE_CNT, S_DIST_01, S_DIST_02, S_DIST_03, S_DIST_04, S_DIST_05, S_DIST_06, S_DIST_07,S_DIST_08, S_DIST_09, S_DIST_10, S_DATA) FROM '~/Desktop/project_files_4/data_files/stock.csv' WITH HEADER=TRUE;
-
-COPY CS5424.CUSTOMER_ORDER_ITEMS (coi_W_ID, coi_D_ID, coi_O_ID, coi_I_IDS, coi_C_ID) FROM '~/Desktop/project_files_4/data_files/customer_order_items.csv' WITH HEADER=TRUE;

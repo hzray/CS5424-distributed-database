@@ -1,10 +1,13 @@
+import sys
+
 from canssandra import cql
 from datetime import datetime
 
-def new_order_input_helper(n, file):
+
+def new_order_input_helper(n):
     items = []
     for i in range(0, n):
-        line = file.readline()
+        line = sys.stdin.readline()
         info = line.split(",")
         items.append(OrderItem(int(info[0]), int(info[1]), int(info[2])))
     return items
@@ -25,10 +28,9 @@ class OrderItem:
 
 
 class NewOrderHandler:
-    def __init__(self, cql_session, query, file, c_id, w_id, d_id, n_item):
+    def __init__(self, cql_session, query, c_id, w_id, d_id, n_item):
         self.session = cql_session
         self.query = query
-        self.file = file
         self.w_id = int(w_id)
         self.d_id = int(d_id)
         self.c_id = int(c_id)
@@ -89,7 +91,7 @@ class NewOrderHandler:
         cql.insert(self.session, self.query.insert_co, args)
 
     def run(self):
-        items = new_order_input_helper(self.n_item, self.file)
+        items = new_order_input_helper(self.n_item)
         # Step 1
         district = self.select_district(self.w_id, self.d_id)
         o_id = district.d_next_o_id
