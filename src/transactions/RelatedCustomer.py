@@ -1,4 +1,4 @@
-from cassandra import cql
+from src import cql
 from collections import Counter
 
 

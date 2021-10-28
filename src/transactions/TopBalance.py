@@ -1,4 +1,4 @@
-from cassandra import cql
+from src import cql
 
 
 def flatten(t):

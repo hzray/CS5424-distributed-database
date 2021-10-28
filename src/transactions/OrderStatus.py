@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from cassandra import cql
+from src import cql
 
 
 class OrderStatusHandler:
