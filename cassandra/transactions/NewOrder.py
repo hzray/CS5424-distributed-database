@@ -1,6 +1,6 @@
 import sys
 
-from canssandra import cql
+from cassandra import cql
 from datetime import datetime
 
 

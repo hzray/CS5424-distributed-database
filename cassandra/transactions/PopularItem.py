@@ -1,4 +1,4 @@
-from canssandra import cql
+from cassandra import cql
 
 
 class PopularItemHandler:
