@@ -1,12 +1,12 @@
-COPY CS5424.WAREHOUSE (W_ID, W_NAME, W_STREET_1, W_STREET_2, W_CITY, W_STATE, W_ZIP, W_TAX, W_YTD) FROM '~/Desktop/project_files_4/data_files/warehouse.csv' WITH HEADER=TRUE;
+COPY CS5424.WAREHOUSE (W_ID, W_NAME, W_STREET_1, W_STREET_2, W_CITY, W_STATE, W_ZIP, W_TAX, W_YTD) FROM '/temp/project_files/project_files_cassandra/data_files/warehouse.csv' WITH HEADER=TRUE;
 
-COPY CS5424.DISTRICT (D_W_ID, D_ID, D_NAME, D_STREET_1, D_STREET_2, D_CITY, D_STATE, D_ZIP, D_TAX, D_YTD, D_NEXT_O_ID) FROM '~/Desktop/project_files_4/data_files/district.csv' WITH HEADER=TRUE;
+COPY CS5424.DISTRICT (D_W_ID, D_ID, D_NAME, D_STREET_1, D_STREET_2, D_CITY, D_STATE, D_ZIP, D_TAX, D_YTD, D_NEXT_O_ID) FROM '/temp/project_files/project_files_cassandra/data_files/district.csv' WITH HEADER=TRUE;
 
-COPY CS5424.CUSTOMER (C_W_ID, C_D_ID, C_ID, C_FIRST, C_MIDDLE, C_LAST, C_STREET_1, C_STREET_2, C_CITY, C_STATE, C_ZIP, C_PHONE, C_SINCE, C_CREDIT, C_CREDIT_LIM, C_DISCOUNT, C_BALANCE, C_YTD_PAYMENT, C_PAYMENT_CNT, C_DELIVERY_CNT, C_DATA) FROM '~/Desktop/project_files_4/data_files/customer.csv' WITH HEADER=TRUE;
+COPY CS5424.CUSTOMER (C_W_ID, C_D_ID, C_ID, C_FIRST, C_MIDDLE, C_LAST, C_STREET_1, C_STREET_2, C_CITY, C_STATE, C_ZIP, C_PHONE, C_SINCE, C_CREDIT, C_CREDIT_LIM, C_DISCOUNT, C_BALANCE, C_YTD_PAYMENT, C_PAYMENT_CNT, C_DELIVERY_CNT, C_DATA) FROM '/temp/project_files/project_files_cassandra/data_files/customer.csv' WITH HEADER=TRUE;
 
-COPY CS5424.ORDERS (O_W_ID, O_D_ID, O_ID, O_C_ID, O_CARRIER_ID, O_OL_CNT, O_ALL_LOCAL, O_ENTRY_D) FROM '~/Desktop/project_files_4/data_files/order.csv' WITH HEADER=TRUE;
+COPY CS5424.ORDERS (O_W_ID, O_D_ID, O_ID, O_C_ID, O_CARRIER_ID, O_OL_CNT, O_ALL_LOCAL, O_ENTRY_D) FROM '/temp/project_files/project_files_cassandra/data_files/order.csv' WITH HEADER=TRUE;
 
-COPY CS5424.ITEM (I_ID, I_NAME, I_PRICE, I_IM_ID, I_DATA) FROM '~/Desktop/project_files_4/data_files/item.csv' WITH HEADER=TRUE;
+COPY CS5424.ITEM (I_ID, I_NAME, I_PRICE, I_IM_ID, I_DATA) FROM '/temp/project_files/project_files_cassandra/data_files/item.csv' WITH HEADER=TRUE;
 
-COPY CS5424.ORDER_LINE (OL_W_ID, OL_D_ID, OL_O_ID, OL_NUMBER, OL_I_ID, OL_DELIVERY_D, OL_AMOUNT, OL_SUPPLY_W_ID, OL_QUANTITY, OL_DIST_INFO) FROM '~/Desktop/project_files_4/data_files/order-line.csv' WITH HEADER=TRUE;
+COPY CS5424.ORDER_LINE (OL_W_ID, OL_D_ID, OL_O_ID, OL_NUMBER, OL_I_ID, OL_DELIVERY_D, OL_AMOUNT, OL_SUPPLY_W_ID, OL_QUANTITY, OL_DIST_INFO) FROM '/temp/project_files/project_files_cassandra/data_files/order-line.csv' WITH HEADER=TRUE;
 

@@ -36,9 +36,18 @@ class NewOrderHandler:
         self.c_id = int(c_id)
         self.n_item = int(n_item)
 
-    def update_district_next_o_id(self, w_id, d_id, n):
-        args = [n, w_id, d_id]
-        cql.update(self.session, self.query.update_next_o_id, args)
+    def select_and_update_district(self, w_id, d_id):
+        counter = 0
+        while counter < 3:
+            district = self.select_district(w_id, d_id)
+            o_id = district.d_next_o_id
+            args = [o_id+1, w_id, d_id, o_id]
+            result = cql.update(self.session, self.query.update_next_o_id, args)
+            if result.applied:
+                return district
+            else:
+                counter += 1
+        return None
 
     def update_stock(self, stock, w_id, quantity):
         qty = stock.s_quantity - quantity
@@ -92,12 +101,13 @@ class NewOrderHandler:
 
     def run(self):
         items = new_order_input_helper(self.n_item)
-        # Step 1
-        district = self.select_district(self.w_id, self.d_id)
-        o_id = district.d_next_o_id
+        # Step 1 and 2
 
-        # Step 2
-        self.update_district_next_o_id(self.w_id, self.d_id, o_id + 1)
+        district = self.select_and_update_district(self.w_id, self.d_id)
+        if district is None:
+            return False
+
+        o_id = district.d_next_o_id
 
         # Step 3
         all_local = 1
@@ -173,3 +183,4 @@ class NewOrderHandler:
         # Insert into customer_order
         item_ids = [item.Id for item in items]
         self.insert_customer_order(self.w_id, self.d_id, self.c_id, o_id, item_ids)
+        return True

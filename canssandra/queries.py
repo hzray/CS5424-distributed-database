@@ -1,4 +1,5 @@
-update_district_next_o_id = "UPDATE CS5424.district SET d_next_o_id = ? WHERE d_w_id = ? AND d_id = ?"
+update_district_next_o_id = "UPDATE CS5424.district SET d_next_o_id = ? WHERE d_w_id = ? AND d_id = ? IF d_next_o_id " \
+                            "= ? "
 
 update_stock = "UPDATE CS5424.stock SET s_quantity = ?, s_ytd =  ?, s_order_cnt = ?, s_remote_cnt = ? " \
                "WHERE s_w_id = ? AND s_i_id = ?"
@@ -8,10 +9,10 @@ update_warehouse_ytd = "UPDATE CS5424.warehouse SET w_ytd = ? where w_id = ?"
 update_district_ytd = "UPDATE CS5424.district SET d_ytd = ? where d_w_id = ? AND d_id = ?"
 
 update_customer_payment = "UPDATE CS5424.customer SET c_balance = ?, c_ytd_payment = ?, c_payment_cnt = ? " \
-                          "where c_w_id = ? AND c_d_id = ? AND c_id = ?"
+                          "where c_w_id = ? AND c_d_id = ? AND c_id = ? if c_balance = ?"
 
 update_customer_delivery = "UPDATE CS5424.customer SET c_balance = ?, c_delivery_cnt = ? " \
-                           "WHERE c_w_id = ? and c_d_id = ? and c_id = ?"
+                           "WHERE c_w_id = ? and c_d_id = ? and c_id = ? if c_balance = ?"
 
 update_order_carrier_id = "UPDATE CS5424.orders SET o_carrier_id = ? WHERE o_w_id = ? and o_d_id = ? and o_id = ?"
 
