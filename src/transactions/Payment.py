@@ -1,44 +1,55 @@
-import cql
+import decimal
+
+from transactions.cql import utils
 
 
 class PaymentHandler:
-    def __init__(self, cql_session, w_id, d_id, c_id, payment):
+    def __init__(self, cql_session, query, w_id, d_id, c_id, payment):
         self.session = cql_session
-        self.w_id = w_id
-        self.d_id = d_id
-        self.c_id = c_id
-        self.payment = payment
+        self.query = query
+        self.w_id = int(w_id)
+        self.d_id = int(d_id)
+        self.c_id = int(c_id)
+        self.payment = decimal.Decimal(payment)
 
     def select_warehouse(self, w_id):
-        query = "SELECT * FROM CS5424.warehouse where w_id = %s"
         args = [w_id]
-        return cql.select_one(self.session, query, args)
+        return utils.select_one(self.session, self.query.select_warehouse, args)
 
     def update_warehouse_ytd(self, w_id, ytd):
-        query = "UPDATE CS5424.warehouse SET w_ytd = %s where w_id = %s"
         args = [ytd, w_id]
-        cql.update(self.session, query, args)
+        utils.update(self.session, self.query.update_warehouse_ytd, args)
 
     def select_district(self, w_id, d_id):
-        query = "SELECT * FROM CS5424.district WHERE d_w_id=%s AND d_id=%s"
         args = [w_id, d_id]
-        return cql.select_one(self.session, query, args)
+        return utils.select_one(self.session, self.query.select_district, args)
 
     def update_district_ytd(self, w_id, d_id, ytd):
-        query = "UPDATE CS5424.district SET d_ytd = %s where d_w_id = %s AND d_id = %s"
         args = [ytd, w_id, d_id]
-        cql.update(self.session, query, args)
+        utils.update(self.session, self.query.update_district_ytd, args)
 
     def select_customer(self, w_id, d_id, c_id):
-        query = "SELECT * FROM CS5424.customer WHERE c_w_id = %s and c_d_id = %s and c_id = %s"
         args = [w_id, d_id, c_id]
-        return cql.select_one(self.session, query, args)
+        return utils.select_one(self.session, self.query.select_customer, args)
 
-    def update_customer(self, w_id, d_id, c_id, balance, ytd_payment, payment_cnt):
-        query = "UPDATE CS5424.customer SET c_balance = %s, c_ytd_payment = %s, c_payment_cnt = %s " \
-                "where c_w_id = %s AND c_d_id = %s AND c_id = %s"
-        args = [balance, ytd_payment, payment_cnt, w_id, d_id, c_id]
-        cql.update(self.session, query, args)
+    def update_customer(self, w_id, d_id, c_id, balance, ytd_payment, payment_cnt, old_balance):
+        args = [balance, ytd_payment, payment_cnt, w_id, d_id, c_id, old_balance]
+        result = utils.update(self.session, self.query.update_customer_payment, args)
+        if result.applied:
+            return True
+        return False
+
+    def select_and_update_customer(self, w_id, d_id, c_id):
+        counter = 0
+        while counter < 3:
+            customer = self.select_customer(w_id, d_id, c_id)
+            if self.update_customer(w_id, d_id, c_id, customer.c_balance - self.payment,
+                                    customer.c_ytd_payment + self.payment, customer.c_payment_cnt + 1,
+                                    customer.c_balance):
+                return customer
+            else:
+                counter += 1
+        return None
 
     def run(self):
         # Step 1
@@ -50,15 +61,16 @@ class PaymentHandler:
         self.update_district_ytd(self.w_id, self.d_id, district.d_ytd + self.payment)
 
         # Step 3
-        customer = self.select_customer(self.w_id, self.d_id, self.c_id)
-        self.update_customer(self.w_id, self.d_id, self.c_id, customer.c_balance-self.payment,
-                             customer.c_ytd_payment+self.payment, customer.c_payment_cnt+1)
+        customer = self.select_and_update_customer(self.w_id, self.d_id, self.c_id)
+        if not customer:
+            return False
 
         # Output
         customer_output = "customer: W_ID = {}, D_ID = {}, C_ID = {}, C_FIRST = {}, C_MIDDLE = {}, C_LAST = {}, " \
                           "C_STREET_1 = {}, C_STREET_2 = {}, C_CITY = {}, C_STATE = {}, C_ZIP = {}, C_PHONE, " \
                           "C_SINCE = {}, C_CREDIT = {}, C_CREDIT_LIM = {}, C_DISCOUNT = {}, C_BALANCE = {}" \
-            .format(customer.c_w_id, customer.c_d_id, customer.c_id, customer.c_first, customer.c_middle, customer.c_last,
+            .format(customer.c_w_id, customer.c_d_id, customer.c_id, customer.c_first, customer.c_middle,
+                    customer.c_last,
                     customer.c_street_1, customer.c_street_2, customer.c_city, customer.c_state, customer.c_zip,
                     customer.c_phone, customer.c_since, customer.c_credit, customer.c_credit_lim,
                     customer.c_discount, customer.c_balance)
@@ -77,8 +89,6 @@ class PaymentHandler:
 
         print(district_address)
 
-        print("payment = " + self.payment)
+        print("payment = {}".format(self.payment))
 
-
-
-
+        return True

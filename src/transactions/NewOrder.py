@@ -1,13 +1,14 @@
-import cql
+import sys
+
+from transactions.cql import utils
 from datetime import datetime
 
 
 def new_order_input_helper(n):
     items = []
     for i in range(0, n):
-        line = input(
-            "enter information for item{} in format [OL_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY]\n".format(i + 1))
-        info = line.split(" ")
+        line = sys.stdin.readline()
+        info = line.split(",")
         items.append(OrderItem(int(info[0]), int(info[1]), int(info[2])))
     return items
 
@@ -27,17 +28,26 @@ class OrderItem:
 
 
 class NewOrderHandler:
-    def __init__(self, cql_session, c_id, w_id, d_id, n_item):
+    def __init__(self, cql_session, query, c_id, w_id, d_id, n_item):
         self.session = cql_session
-        self.w_id = w_id
-        self.d_id = d_id
-        self.c_id = c_id
-        self.n_item = n_item
+        self.query = query
+        self.w_id = int(w_id)
+        self.d_id = int(d_id)
+        self.c_id = int(c_id)
+        self.n_item = int(n_item)
 
-    def update_district_next_o_id(self, w_id, d_id, n):
-        query = "UPDATE CS5424.district SET d_next_o_id = %s WHERE d_w_id=%s AND d_id=%s"
-        args = [n, w_id, d_id]
-        cql.update(self.session, query, args)
+    def select_and_update_district(self, w_id, d_id):
+        counter = 0
+        while counter < 3:
+            district = self.select_district(w_id, d_id)
+            o_id = district.d_next_o_id
+            args = [o_id+1, w_id, d_id, o_id]
+            result = utils.update(self.session, self.query.update_next_o_id, args)
+            if result.applied:
+                return district
+            else:
+                counter += 1
+        return None
 
     def update_stock(self, stock, w_id, quantity):
         qty = stock.s_quantity - quantity
@@ -49,63 +59,55 @@ class NewOrderHandler:
         remote_cnt = stock.s_remote_cnt
         if w_id != stock.s_w_id:
             remote_cnt += 1
-
-        query = "UPDATE CS5424.stock SET s_quantity = %s, s_ytd =  %s, s_order_cnt = %s, s_remote_cnt = %s " \
-                "WHERE s_w_id = %s AND s_i_id = %s"
         args = [qty, ytd, order_cnt, remote_cnt, stock.s_w_id, stock.s_i_id]
-        cql.update(self.session, query, args)
+        utils.update(self.session, self.query.update_stock, args)
         return qty
 
     def insert_order_line(self, w_id, d_id, o_id, i, i_id, t, sup_id, qty, item_amount, dist_info):
-        query = """
-                    INSERT INTO 
-                    CS5424.order_line(ol_w_id, ol_d_id, ol_o_id, ol_number, ol_i_id, ol_delivery_d, ol_amount, 
-                                ol_supply_w_id, ol_quantity, ol_dist_info)
-                    VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """
         args = [w_id, d_id, o_id, i, i_id, t, item_amount, sup_id, qty, dist_info]
-        cql.insert(self.session, query, args)
+        utils.insert(self.session, self.query.insert_ol, args)
 
-    def insert_order(self, w_id, d_id, c_id,  o_id, all_local, t):
-        query = "INSERT INTO " \
-                "CS5424.orders(o_w_id, o_d_id, o_id, o_c_id, o_carrier_id, o_ol_cnt, o_all_local, o_entry_d) " \
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        args = [w_id, d_id, o_id, c_id, 'unknown', self.n_item, all_local, t]
-        cql.insert(self.session, query, args)
+    def insert_order(self, w_id, d_id, c_id, o_id, all_local, t):
+        args = [w_id, d_id, o_id, c_id, -1, self.n_item, all_local, t]
+        utils.insert(self.session, self.query.insert_order, args)
 
     def select_district(self, w_id, d_id):
-        query = "SELECT * FROM CS5424.district WHERE d_w_id=%s AND d_id=%s"
         args = [w_id, d_id]
-        return cql.select_one(self.session, query, args)
+        return utils.select_one(self.session, self.query.select_district, args)
 
     def select_item(self, i_id):
-        query = "SELECT * FROM CS5424.item WHERE i_id=%s"
         args = [i_id]
-        return cql.select_one(self.session, query, args)
+        return utils.select_one(self.session, self.query.select_item, args)
 
     def select_stock(self, sup_id, i_id):
-        query = "SELECT * FROM CS5424.stock WHERE s_w_id=%s AND s_i_id=%s"
         args = [sup_id, i_id]
-        return cql.select_one(self.session, query, args)
+        return utils.select_one(self.session, self.query.select_stock, args)
 
     def select_warehouse(self, w_id):
-        query = "SELECT * FROM CS5424.warehouse where w_id = %s"
         args = [w_id]
-        return cql.select_one(self.session, query, args)
+        return utils.select_one(self.session, self.query.select_warehouse, args)
 
     def select_customer(self, w_id, d_id, c_id):
-        query = "SELECT * FROM CS5424.customer WHERE c_w_id = %s and c_d_id = %s and c_id = %s"
         args = [w_id, d_id, c_id]
-        return cql.select_one(self.session, query, args)
+        return utils.select_one(self.session, self.query.select_customer, args)
+
+    def insert_customer_order_items(self, w_id, d_id, c_id, o_id, i_id):
+        args = [w_id, d_id, c_id, o_id, i_id]
+        utils.insert(self.session, self.query.insert_coi, args)
+
+    def insert_customer_order(self, w_id, d_id, c_id, o_id, i_ids):
+        args = [w_id, d_id, c_id, o_id, i_ids]
+        utils.insert(self.session, self.query.insert_co, args)
 
     def run(self):
         items = new_order_input_helper(self.n_item)
-        # Step 1
-        district = self.select_district(self.w_id, self.d_id)
-        o_id = district.d_next_o_id
+        # Step 1 and 2
 
-        # Step 2
-        self.update_district_next_o_id(self.w_id, self.d_id, o_id + 1)
+        district = self.select_and_update_district(self.w_id, self.d_id)
+        if district is None:
+            return False
+
+        o_id = district.d_next_o_id
 
         # Step 3
         all_local = 1
@@ -140,7 +142,8 @@ class NewOrderHandler:
             d_id_str = d_id_str.zfill(2)
             dist_info = getattr(stock, 's_dist_' + d_id_str)
 
-            self.insert_order_line(self.w_id, self.d_id, o_id, i, item.Id, datetime(1970, 1, 1, 0, 0), item.supplier_id, item.quantity,
+            self.insert_order_line(self.w_id, self.d_id, o_id, i, item.Id, datetime(1970, 1, 1, 0, 0), item.supplier_id,
+                                   item.quantity,
                                    item_amount, dist_info)
 
             i += 1
@@ -152,7 +155,7 @@ class NewOrderHandler:
         total_amount = total_amount * (1 + district.d_tax + warehouse.w_tax) * (1 - c_discount)
 
         # Output
-        customer_output = "customer: W_ID = {}, D_ID = {}, C_ID = {}, C_LAST = {}, C_CREDIT = {}, C_DISCOUNT = {}"\
+        customer_output = "customer: W_ID = {}, D_ID = {}, C_ID = {}, C_LAST = {}, C_CREDIT = {}, C_DISCOUNT = {}" \
             .format(self.w_id, self.d_id, self.c_id, customer.c_last, customer.c_credit, customer.c_discount)
         print(customer_output)
         print("W_TAX = {}, D_TAX = {}".format(warehouse.w_tax, district.d_tax))
@@ -172,3 +175,12 @@ class NewOrderHandler:
                                                 item.price * item.quantity,
                                                 item.stock_quantity)
             print(item_str)
+
+        # Insert into customer_order_items
+        for item in items:
+            self.insert_customer_order_items(self.w_id, self.d_id, self.c_id, o_id, item.Id)
+
+        # Insert into customer_order
+        item_ids = [item.Id for item in items]
+        self.insert_customer_order(self.w_id, self.d_id, self.c_id, o_id, item_ids)
+        return True

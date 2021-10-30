@@ -1,0 +1,31 @@
+from . import queries
+
+
+class PreparedQuery:
+    def __init__(self, session):
+        self.select_district = session.prepare(queries.select_district)
+        self.update_next_o_id = session.prepare(queries.update_district_next_o_id)
+        self.update_stock = session.prepare(queries.update_stock)
+        self.update_warehouse_ytd = session.prepare(queries.update_warehouse_ytd)
+        self.update_district_ytd = session.prepare(queries.update_district_ytd)
+        self.update_customer_payment = session.prepare(queries.update_customer_payment)
+        self.update_order_carrier_id = session.prepare(queries.update_order_carrier_id)
+        self.update_ol_deliver_d = session.prepare(queries.update_order_line_delivery_d)
+        self.update_customer_delivery = session.prepare(queries.update_customer_delivery)
+        self.insert_ol = session.prepare(queries.insert_order_line)
+        self.insert_order = session.prepare(queries.insert_order)
+        self.insert_coi = session.prepare(queries.insert_customer_order_items)
+        self.insert_co = session.prepare(queries.insert_customer_order)
+        self.select_item = session.prepare(queries.select_item)
+        self.select_stock = session.prepare(queries.select_stock)
+        self.select_warehouse = session.prepare(queries.select_warehouse)
+        self.select_customer = session.prepare(queries.select_customer)
+        self.select_order_with_carrier = session.prepare(queries.select_order_with_carrier)
+        self.select_ol = session.prepare(queries.select_order_line)
+        self.select_order_with_customer = session.prepare(queries.select_order_with_customer)
+        self.select_ol_in_range = session.prepare(queries.select_order_line_in_range)
+        self.select_order_in_range = session.prepare(queries.select_order_in_range)
+        self.select_customer_sort_by_balance = session.prepare(queries.select_customer_sort_by_balance)
+        self.select_customer_order_items = session.prepare(queries.select_customer_order_items)
+        self.select_customer_order = session.prepare(queries.select_customer_order)
+        self.select_customer_by_district = session.prepare(queries.select_customer_by_district)

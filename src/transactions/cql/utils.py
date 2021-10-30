@@ -7,7 +7,7 @@ def select(session, query, args):
 
 
 def update(session, query, args):
-    session.execute(query, args)
+    return session.execute(query, args).one()
 
 
 def insert(session, query, args):
