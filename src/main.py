@@ -2,15 +2,16 @@ import sys
 import time
 import numpy as np
 
-from transactions import NewOrder, Delivery, Payment, OrderStatus, StockLevel, PopularItem, RelatedCustomer, TopBalance
+from transactions import OrderStatus, Payment, StockLevel, RelatedCustomer, Delivery, NewOrder, PopularItem, \
+    TopBalance
 from cassandra.cluster import Cluster
-from QueryPrepare import Query
+from transactions.cql.QueryPrepare import PreparedQuery
 
 
 def main():
-    cluster = Cluster(['192.168.51.13', '192.168.51.14'])
+    cluster = Cluster(['127.0.0.1'], 6042)
     session = cluster.connect()
-    query = Query(session)
+    query = PreparedQuery(session)
 
     total_time_start = time.time()
     latencies = []
@@ -29,7 +30,7 @@ def main():
             if not new_order_handler.run():
                 success = False
         elif command == 'P':
-            payment_handler = Payment.PaymentHandler(session, query,  *args[1:])
+            payment_handler = Payment.PaymentHandler(session, query, *args[1:])
             if not payment_handler.run():
                 success = False
         elif command == 'D':
@@ -67,8 +68,8 @@ def main():
     print("Total elapsed time for processing the transactions = {:.2f} seconds".format(total_time))
     print("Transaction throughput = {:.2f} per second".format(success_count / total_time))
     print("Average latency = {:.2f}".format(np.average(latencies)))
-    print("95th percentile transaction latency = {:.2f)".format(np.percentile(latencies, 95)))
-    print("99th percentile transaction latency = {:.2f)".format(np.percentile(latencies, 99)))
+    print("95th percentile transactions latency = {:.2f}".format(np.percentile(latencies, 95)))
+    print("99th percentile transactions latency = {:.2f}".format(np.percentile(latencies, 99)))
 
 
 if __name__ == "__main__":

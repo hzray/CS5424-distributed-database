@@ -1,6 +1,7 @@
-import queries
+from . import queries
 
-class Query:
+
+class PreparedQuery:
     def __init__(self, session):
         self.select_district = session.prepare(queries.select_district)
         self.update_next_o_id = session.prepare(queries.update_district_next_o_id)

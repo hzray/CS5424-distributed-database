@@ -1,4 +1,4 @@
-from src import cql
+from transactions.cql import utils
 
 
 class StockLevelHandler:
@@ -12,11 +12,11 @@ class StockLevelHandler:
 
     def select_district(self, w_id, d_id):
         args = [w_id, d_id]
-        return cql.select_one(self.session, self.query.select_district, args)
+        return utils.select_one(self.session, self.query.select_district, args)
 
     def find_items_from_last_l_orders(self, w_id, d_id, bot, top):
         args = [w_id, d_id, bot, top]
-        rows = cql.select(self.session, self.query.select_ol_in_range, args)
+        rows = utils.select(self.session, self.query.select_ol_in_range, args)
 
         count = 0
         for row in rows:
@@ -28,7 +28,7 @@ class StockLevelHandler:
 
     def select_stock(self, w_id, i_id):
         args = [w_id, i_id]
-        return cql.select_one(self.session, self.query.select_stock, args)
+        return utils.select_one(self.session, self.query.select_stock, args)
 
     def run(self):
         district = self.select_district(self.w_id, self.d_id)

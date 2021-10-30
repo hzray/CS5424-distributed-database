@@ -1,6 +1,6 @@
 import decimal
 
-from src import cql
+from transactions.cql import utils
 
 
 class PaymentHandler:
@@ -14,32 +14,32 @@ class PaymentHandler:
 
     def select_warehouse(self, w_id):
         args = [w_id]
-        return cql.select_one(self.session, self.query.select_warehouse, args)
+        return utils.select_one(self.session, self.query.select_warehouse, args)
 
     def update_warehouse_ytd(self, w_id, ytd):
         args = [ytd, w_id]
-        cql.update(self.session, self.query.update_warehouse_ytd, args)
+        utils.update(self.session, self.query.update_warehouse_ytd, args)
 
     def select_district(self, w_id, d_id):
         args = [w_id, d_id]
-        return cql.select_one(self.session, self.query.select_district, args)
+        return utils.select_one(self.session, self.query.select_district, args)
 
     def update_district_ytd(self, w_id, d_id, ytd):
         args = [ytd, w_id, d_id]
-        cql.update(self.session, self.query.update_district_ytd, args)
+        utils.update(self.session, self.query.update_district_ytd, args)
 
     def select_customer(self, w_id, d_id, c_id):
         args = [w_id, d_id, c_id]
-        return cql.select_one(self.session, self.query.select_customer, args)
+        return utils.select_one(self.session, self.query.select_customer, args)
 
     def update_customer(self, w_id, d_id, c_id, balance, ytd_payment, payment_cnt, old_balance):
         args = [balance, ytd_payment, payment_cnt, w_id, d_id, c_id, old_balance]
-        result = cql.update(self.session, self.query.update_customer_payment, args)
+        result = utils.update(self.session, self.query.update_customer_payment, args)
         if result.applied:
             return True
         return False
 
-    def select_and_update(self, w_id, d_id, c_id):
+    def select_and_update_customer(self, w_id, d_id, c_id):
         counter = 0
         while counter < 3:
             customer = self.select_customer(w_id, d_id, c_id)
@@ -61,7 +61,7 @@ class PaymentHandler:
         self.update_district_ytd(self.w_id, self.d_id, district.d_ytd + self.payment)
 
         # Step 3
-        customer = self.select_and_update(self.w_id, self.d_id, self.c_id)
+        customer = self.select_and_update_customer(self.w_id, self.d_id, self.c_id)
         if not customer:
             return False
 

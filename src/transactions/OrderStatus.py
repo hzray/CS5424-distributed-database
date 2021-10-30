@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src import cql
+from transactions.cql import utils
 
 
 class OrderStatusHandler:
@@ -13,15 +13,15 @@ class OrderStatusHandler:
 
     def select_customer(self, w_id, d_id, c_id):
         args = [w_id, d_id, c_id]
-        return cql.select_one(self.session, self.query.select_customer, args)
+        return utils.select_one(self.session, self.query.select_customer, args)
 
     def find_customer_last_order(self, w_id, d_id, c_id):
         args = [w_id, d_id, c_id]
-        return cql.select_one(self.session, self.query.select_order_with_customer, args)
+        return utils.select_one(self.session, self.query.select_order_with_customer, args)
 
     def select_order_line(self, w_id, d_id, o_id):
         args = [w_id, d_id, o_id]
-        return cql.select(self.session, self.query.select_ol, args)
+        return utils.select(self.session, self.query.select_ol, args)
 
     def run(self):
         # Step 1

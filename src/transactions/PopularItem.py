@@ -1,4 +1,4 @@
-from src import cql
+from transactions.cql import utils
 
 
 class PopularItemHandler:
@@ -11,23 +11,23 @@ class PopularItemHandler:
 
     def select_district(self, w_id, d_id):
         args = [w_id, d_id]
-        return cql.select_one(self.session, self.query.select_district, args)
+        return utils.select_one(self.session, self.query.select_district, args)
 
     def find_last_n_orders(self, w_id, d_id, bot, top):
         args = [w_id, d_id, bot, top]
-        return list(cql.select(self.session, self.query.select_order_in_range, args))
+        return list(utils.select(self.session, self.query.select_order_in_range, args))
 
     def select_order_lines(self, w_id, d_id, o_id):
         args = [w_id, d_id, o_id]
-        return list(cql.select(self.session, self.query.select_ol, args))
+        return list(utils.select(self.session, self.query.select_ol, args))
 
     def select_customer(self, w_id, d_id, c_id):
         args = [w_id, d_id, c_id]
-        return cql.select_one(self.session, self.query.select_customer, args)
+        return utils.select_one(self.session, self.query.select_customer, args)
 
     def select_item(self, i_id):
         args = [i_id]
-        return cql.select_one(self.session, self.query.select_item, args)
+        return utils.select_one(self.session, self.query.select_item, args)
 
     def run(self):
         district = self.select_district(self.w_id, self.d_id)

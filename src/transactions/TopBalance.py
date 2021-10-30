@@ -1,4 +1,4 @@
-from src import cql
+from transactions.cql import utils
 
 
 def flatten(t):
@@ -19,18 +19,18 @@ class TopBalanceHandler:
         for w_id in range(1, 11):
             for d_id in range(1, 11):
                 args = [w_id, d_id, 10]
-                customers.append(list(cql.select(self.session, self.query.select_customer_sort_by_balance, args)))
+                customers.append(list(utils.select(self.session, self.query.select_customer_sort_by_balance, args)))
         customers = flatten(customers)
         customers.sort(key=takeBalance, reverse=True)
         return customers[:10]
 
     def select_warehouse(self, w_id):
         args = [w_id]
-        return cql.select_one(self.session, self.query.select_warehouse, args)
+        return utils.select_one(self.session, self.query.select_warehouse, args)
 
     def select_district(self, w_id, d_id):
         args = [w_id, d_id]
-        return cql.select_one(self.session, self.query.select_district, args)
+        return utils.select_one(self.session, self.query.select_district, args)
 
     def run(self):
         customers = self.find_top_ten_customers()

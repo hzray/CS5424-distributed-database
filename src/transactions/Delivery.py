@@ -1,6 +1,5 @@
-from src import cql
 from datetime import datetime
-
+from transactions.cql import utils
 
 class DeliveryHandler:
     def __init__(self, cql_session, query, w_id, carrier_id):
@@ -11,34 +10,34 @@ class DeliveryHandler:
 
     def find_smallest_order(self, w_id, d_id):
         args = [w_id, d_id, -1]
-        return cql.select_one(self.session, self.query.select_order_with_carrier, args)
+        return utils.select_one(self.session, self.query.select_order_with_carrier, args)
 
     def update_order_carrier_id(self, w_id, d_id, o_id, carrier_id):
         args = [carrier_id, w_id, d_id, o_id]
-        cql.update(self.session, self.query.update_order_carrier_id, args)
+        utils.update(self.session, self.query.update_order_carrier_id, args)
 
     def select_order_line(self, w_id, d_id, o_id):
         args = [w_id, d_id, o_id]
-        return cql.select(self.session, self.query.select_ol, args)
+        return utils.select(self.session, self.query.select_ol, args)
 
     def update_delivery_d(self, w_id, d_id, o_id, ol_number, t):
         args = [t, w_id, d_id, o_id, ol_number]
-        cql.update(self.session, self.query.update_ol_deliver_d, args)
+        utils.update(self.session, self.query.update_ol_deliver_d, args)
 
     def update_customer(self, w_id, d_id, c_id, balance, cnt, old_balance):
         args = [balance, cnt, w_id, d_id, c_id, old_balance]
-        result = cql.update(self.session, self.query.update_customer_delivery, args)
+        result = utils.update(self.session, self.query.update_customer_delivery, args)
         if result.applied:
             return True
         return False
 
     def select_customer(self, w_id, d_id, c_id):
         args = [w_id, d_id, c_id]
-        return cql.select_one(self.session, self.query.select_customer, args)
+        return utils.select_one(self.session, self.query.select_customer, args)
 
     def sum_order_amount(self, w_id, d_id, o_id):
         args = [w_id, d_id, o_id]
-        rows = cql.select(self.session, self.query.select_ol, args)
+        rows = utils.select(self.session, self.query.select_ol, args)
         amount = 0
         for row in rows:
             amount += row.ol_amount

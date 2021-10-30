@@ -1,6 +1,6 @@
 import sys
 
-from src import cql
+from transactions.cql import utils
 from datetime import datetime
 
 
@@ -42,7 +42,7 @@ class NewOrderHandler:
             district = self.select_district(w_id, d_id)
             o_id = district.d_next_o_id
             args = [o_id+1, w_id, d_id, o_id]
-            result = cql.update(self.session, self.query.update_next_o_id, args)
+            result = utils.update(self.session, self.query.update_next_o_id, args)
             if result.applied:
                 return district
             else:
@@ -60,44 +60,44 @@ class NewOrderHandler:
         if w_id != stock.s_w_id:
             remote_cnt += 1
         args = [qty, ytd, order_cnt, remote_cnt, stock.s_w_id, stock.s_i_id]
-        cql.update(self.session, self.query.update_stock, args)
+        utils.update(self.session, self.query.update_stock, args)
         return qty
 
     def insert_order_line(self, w_id, d_id, o_id, i, i_id, t, sup_id, qty, item_amount, dist_info):
         args = [w_id, d_id, o_id, i, i_id, t, item_amount, sup_id, qty, dist_info]
-        cql.insert(self.session, self.query.insert_ol, args)
+        utils.insert(self.session, self.query.insert_ol, args)
 
     def insert_order(self, w_id, d_id, c_id, o_id, all_local, t):
         args = [w_id, d_id, o_id, c_id, -1, self.n_item, all_local, t]
-        cql.insert(self.session, self.query.insert_order, args)
+        utils.insert(self.session, self.query.insert_order, args)
 
     def select_district(self, w_id, d_id):
         args = [w_id, d_id]
-        return cql.select_one(self.session, self.query.select_district, args)
+        return utils.select_one(self.session, self.query.select_district, args)
 
     def select_item(self, i_id):
         args = [i_id]
-        return cql.select_one(self.session, self.query.select_item, args)
+        return utils.select_one(self.session, self.query.select_item, args)
 
     def select_stock(self, sup_id, i_id):
         args = [sup_id, i_id]
-        return cql.select_one(self.session, self.query.select_stock, args)
+        return utils.select_one(self.session, self.query.select_stock, args)
 
     def select_warehouse(self, w_id):
         args = [w_id]
-        return cql.select_one(self.session, self.query.select_warehouse, args)
+        return utils.select_one(self.session, self.query.select_warehouse, args)
 
     def select_customer(self, w_id, d_id, c_id):
         args = [w_id, d_id, c_id]
-        return cql.select_one(self.session, self.query.select_customer, args)
+        return utils.select_one(self.session, self.query.select_customer, args)
 
     def insert_customer_order_items(self, w_id, d_id, c_id, o_id, i_id):
         args = [w_id, d_id, c_id, o_id, i_id]
-        cql.insert(self.session, self.query.insert_coi, args)
+        utils.insert(self.session, self.query.insert_coi, args)
 
     def insert_customer_order(self, w_id, d_id, c_id, o_id, i_ids):
         args = [w_id, d_id, c_id, o_id, i_ids]
-        cql.insert(self.session, self.query.insert_co, args)
+        utils.insert(self.session, self.query.insert_co, args)
 
     def run(self):
         items = new_order_input_helper(self.n_item)
