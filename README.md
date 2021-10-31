@@ -86,5 +86,16 @@ cqlsh localhost 6042 -f /home/stuproj/cs4224m/cs5424_cassandra/src/setup.cql
 
 This will build data model and load data file into database.
 
+#### Start Transaction
+
+~~~bash
+python3 main.py [workload] [client_id] < xact.txt
+~~~
+
+- `workload` = `A` or `B`
+- `client_id` in range[0, 39]
+
+
+
 
 
