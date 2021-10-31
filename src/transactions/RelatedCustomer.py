@@ -51,7 +51,7 @@ class RelatedCustomerHandler:
 
     # def slow_run(self):
     #     args = [self.w_id, self.d_id, self.c_id]
-    #     customer_orders = cql.select(self.session, self.query.select_customer_order, args)
+    #     customer_orders = utils.select(self.session, self.query.select_customer_order, args)
     #     items_list = [row.co_i_ids for row in customer_orders]
     #     for w in range(1, 11):
     #         if w == self.w_id:
@@ -59,7 +59,7 @@ class RelatedCustomerHandler:
     #         for d in range(1, 11):
     #             query = "SELECT * FROM CS5424.customer_order where co_w_id = %s and co_d_id = %s"
     #             args = [w, d]
-    #             orders = cql.select(self.session, query, args)
+    #             orders = utils.select(self.session, query, args)
     #             for o in orders:
     #                 if self.isOverlap(items_list, o.co_i_ids):
     #                     print("W_ID = {}, D_ID = {}, C_ID = {}".format(w, d, o.co_c_id))

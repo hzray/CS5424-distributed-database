@@ -1,15 +1,24 @@
+import csv
 import sys
 import time
 import numpy as np
+from cassandra import ConsistencyLevel
 
 from transactions import OrderStatus, Payment, StockLevel, RelatedCustomer, Delivery, NewOrder, PopularItem, \
     TopBalance
-from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster, ExecutionProfile
 from transactions.cql.QueryPrepare import PreparedQuery
 
 
 def main():
-    cluster = Cluster(['127.0.0.1'], 6042)
+    if len(sys.argv) < 2:
+        sys.exit('Must pass client number')
+
+    client_id = sys.argv[1]
+    read_profile = ExecutionProfile(consistency_level=ConsistencyLevel.QUORUM, request_timeout=1000.0)
+    write_profile = ExecutionProfile(consistency_level=ConsistencyLevel.QUORUM, request_timeout=1000.0)
+    exec_profile = {'read': read_profile, 'write': write_profile}
+    cluster = Cluster(['127.0.0.1'], 6042, execution_profiles=exec_profile)
     session = cluster.connect()
     query = PreparedQuery(session)
 
@@ -55,7 +64,7 @@ def main():
         xact_time_end = time.time()
         if success:
             success_count += 1
-            latencies.append((xact_time_end - xact_time_start)*1000)
+            latencies.append((xact_time_end - xact_time_start) * 1000)
         else:
             fail_count += 1
         print()
@@ -63,13 +72,26 @@ def main():
     total_time_end = time.time()
     total_time = total_time_end - total_time_start
 
-    print("total number of successful transactions = {}".format(success_count))
-    print("total number of failed transactions = {}".format(fail_count))
+    throughput = success_count / total_time
+    average_latency = np.average(latencies)
+    median_latency = np.median(latencies)
+    ninety_five_percentile = np.percentile(latencies, 95)
+    ninety_nine_percentile = np.percentile(latencies, 99)
+
+    print("Total number of successful transactions = {}".format(success_count))
     print("Total elapsed time for processing the transactions = {:.2f} seconds".format(total_time))
-    print("Transaction throughput = {:.2f} per second".format(success_count / total_time))
-    print("Average latency = {:.2f}".format(np.average(latencies)))
-    print("95th percentile transactions latency = {:.2f}".format(np.percentile(latencies, 95)))
-    print("99th percentile transactions latency = {:.2f}".format(np.percentile(latencies, 99)))
+    print("Transaction throughput = {:.2f} per second".format(throughput))
+    print("Average transaction latency = {:.2f} ms".format(average_latency))
+    print("Median transaction latency = {:.2f} ms".format(np.median(median_latency)))
+    print("95th percentile transactions latency = {:.2f} ms".format(ninety_five_percentile))
+    print("99th percentile transactions latency = {:.2f} ms".format(ninety_nine_percentile))
+
+    f = open('../output/client_measurement/{}.csv'.format(client_id), 'w')
+    writer = csv.writer(f)
+    row = [client_id, success_count, total_time, throughput, average_latency, median_latency, ninety_five_percentile,
+           ninety_nine_percentile]
+    writer.writerow(row)
+    f.close()
 
 
 if __name__ == "__main__":
