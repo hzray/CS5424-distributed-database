@@ -29,3 +29,5 @@ class PreparedQuery:
         self.select_customer_order_items = session.prepare(queries.select_customer_order_items)
         self.select_customer_order = session.prepare(queries.select_customer_order)
         self.select_customer_by_district = session.prepare(queries.select_customer_by_district)
+        self.insert_related_customer = session.prepare(queries.insert_related_customer)
+        self.select_related_customer = session.prepare(queries.select_related_customer)

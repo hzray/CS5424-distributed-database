@@ -1,4 +1,5 @@
 import sys
+from collections import Counter
 
 from transactions.cql import utils
 from datetime import datetime
@@ -28,9 +29,10 @@ class OrderItem:
 
 
 class NewOrderHandler:
-    def __init__(self, cql_session, query, c_id, w_id, d_id, n_item):
+    def __init__(self, cql_session, query, workload, c_id, w_id, d_id, n_item):
         self.session = cql_session
         self.query = query
+        self.workload = workload
         self.w_id = int(w_id)
         self.d_id = int(d_id)
         self.c_id = int(c_id)
@@ -41,7 +43,7 @@ class NewOrderHandler:
         while counter < 3:
             district = self.select_district(w_id, d_id)
             o_id = district.d_next_o_id
-            args = [o_id+1, w_id, d_id, o_id]
+            args = [o_id + 1, w_id, d_id, o_id]
             result = utils.update(self.session, self.query.update_next_o_id, args)
             if result.applied:
                 return district
@@ -49,19 +51,28 @@ class NewOrderHandler:
                 counter += 1
         return None
 
-    def update_stock(self, stock, w_id, quantity):
-        qty = stock.s_quantity - quantity
-        if qty < 10:
-            qty += 100
+    def adjust_stock_quantity(self, item, w_id):
+        quantity = item.quantity
+        counter = 0
+        while counter < 3:
+            stock = self.select_stock(item.supplier_id, item.Id)
+            old_quantity = stock.s_quantity
+            qty = old_quantity - quantity
+            if qty < 10:
+                qty += 100
 
-        ytd = stock.s_ytd + quantity
-        order_cnt = stock.s_order_cnt + 1
-        remote_cnt = stock.s_remote_cnt
-        if w_id != stock.s_w_id:
-            remote_cnt += 1
-        args = [qty, ytd, order_cnt, remote_cnt, stock.s_w_id, stock.s_i_id]
-        utils.update(self.session, self.query.update_stock, args)
-        return qty
+            ytd = stock.s_ytd + quantity
+            order_cnt = stock.s_order_cnt + 1
+            remote_cnt = stock.s_remote_cnt
+            if w_id != stock.s_w_id:
+                remote_cnt += 1
+            args = [qty, ytd, order_cnt, remote_cnt, stock.s_w_id, stock.s_i_id, old_quantity]
+            result = utils.update(self.session, self.query.update_stock, args)
+            if result.applied:
+                return stock, qty
+            else:
+                counter += 1
+        return None, None
 
     def insert_order_line(self, w_id, d_id, o_id, i, i_id, t, sup_id, qty, item_amount, dist_info):
         args = [w_id, d_id, o_id, i, i_id, t, item_amount, sup_id, qty, dist_info]
@@ -99,6 +110,30 @@ class NewOrderHandler:
         args = [w_id, d_id, c_id, o_id, i_ids]
         utils.insert(self.session, self.query.insert_co, args)
 
+    def update_related_customer(self, w_id, d_id, c_id, items):
+        for w in range(1, 11):
+            if w == w_id:
+                continue
+            for d in range(1, 11):
+                ids = self.helper(w, d, items)
+                ids = set(ids)
+                for r_c_id in ids:
+                    args = [w_id, d_id, c_id, w, d, r_c_id]
+                    utils.insert(self.session, self.query.insert_related_customer, args)
+
+    def helper(self, r_w_id, r_d_id, items):
+        args = [r_w_id, r_d_id, items]
+        related_order_line = list(utils.select(self.session, self.query.select_customer_order_items, args))
+        o_ids = [row.coi_o_id for row in related_order_line]
+        counter = Counter(o_ids)
+        related_orders = [c for c in counter if counter[c] >= 2]
+
+        c_ids = []
+        for ol in related_order_line:
+            if ol.coi_o_id in related_orders:
+                c_ids.append(ol.coi_c_id)
+        return c_ids
+
     def run(self):
         items = new_order_input_helper(self.n_item)
         # Step 1 and 2
@@ -129,9 +164,9 @@ class NewOrderHandler:
             item.price = item_info.i_price
             item.name = item_info.i_name
 
-            stock = self.select_stock(item.supplier_id, item.Id)
-
-            adjusted_quantity = self.update_stock(stock, self.w_id, item.quantity)
+            (stock, adjusted_quantity) = self.adjust_stock_quantity(item, self.w_id)
+            if stock is None:
+                return False
             item.stock_quantity = adjusted_quantity
 
             item_amount = item.price * item.quantity
@@ -183,4 +218,8 @@ class NewOrderHandler:
         # Insert into customer_order
         item_ids = [item.Id for item in items]
         self.insert_customer_order(self.w_id, self.d_id, self.c_id, o_id, item_ids)
+
+        # if workload = B, update related customer
+        if self.workload == 'B':
+            self.update_related_customer(self.w_id, self.d_id, self.c_id, [item.Id for item in items])
         return True

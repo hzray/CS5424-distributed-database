@@ -2,7 +2,7 @@ update_district_next_o_id = "UPDATE CS5424.district SET d_next_o_id = ? WHERE d_
                             "= ? "
 
 update_stock = "UPDATE CS5424.stock SET s_quantity = ?, s_ytd =  ?, s_order_cnt = ?, s_remote_cnt = ? " \
-               "WHERE s_w_id = ? AND s_i_id = ?"
+               "WHERE s_w_id = ? AND s_i_id = ? IF s_quantity = ?"
 
 update_warehouse_ytd = "UPDATE CS5424.warehouse SET w_ytd = ? where w_id = ?"
 
@@ -34,7 +34,7 @@ insert_customer_order_items = "INSERT INTO CS5424.customer_order_items(coi_w_id,
                               "coi_i_id) VALUES(?, ?, ?, ?, ?)"
 
 insert_customer_order = "INSERT INTO CS5424.customer_order(co_w_id, co_d_id, co_c_id, co_o_id, " \
-                              "co_i_ids) VALUES(?, ?, ?, ?, ?)"
+                        "co_i_ids) VALUES(?, ?, ?, ?, ?)"
 
 select_district = "SELECT * FROM CS5424.district WHERE d_w_id = ? AND d_id = ?"
 
@@ -63,3 +63,8 @@ select_customer_order_items = "SELECT * FROM CS5424.customer_order_items WHERE c
 select_customer_by_district = "SELECT * FROM CS5424.customer WHERE c_w_id = ? AND c_d_id = ?"
 
 select_customer_order = "SELECT * FROM CS5424.customer_order WHERE co_w_id = ? AND co_d_id = ? AND co_c_id = ?"
+
+select_related_customer = "SELECT * FROM CS5424.related_customer where w_id = ? AND d_id = ? AND c_id = ?"
+
+insert_related_customer = "INSERT INTO CS5424.related_customer(w_id, d_id, c_id, r_w_id, " \
+                        "r_d_id, r_c_id) VALUES(?, ?, ?, ?, ?, ?)"

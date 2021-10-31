@@ -5,9 +5,10 @@ def flatten(t):
     return [item for sublist in t for item in sublist]
 
 class RelatedCustomerHandler:
-    def __init__(self, cql_session, query, w_id, d_id, c_id):
+    def __init__(self, cql_session, workload, query, w_id, d_id, c_id):
         self.session = cql_session
         self.query = query
+        self.workload = workload
         self.w_id = int(w_id)
         self.d_id = int(d_id)
         self.c_id = int(c_id)
@@ -29,7 +30,7 @@ class RelatedCustomerHandler:
                 c_ids.append(ol.coi_c_id)
         return c_ids
 
-    def find_related_customers(self, w_id, d_id, c_id):
+    def find_related_customers_A(self, w_id, d_id, c_id):
         # find customer's orders
         customer_orders = self.find_customer_orders(w_id, d_id, c_id)
         # list of list of items
@@ -46,26 +47,15 @@ class RelatedCustomerHandler:
                 for c_id in ids:
                     print("W_ID = {}, D_ID = {}, C_ID = {}".format(w, d, c_id))
 
-    def run(self):
-        self.find_related_customers(self.w_id, self.d_id, self.c_id)
+    def find_related_customer_B(self, w_id, d_id, c_id):
+        args = [w_id, d_id, c_id]
+        customers = utils.select(self.session, self.query.select_related_customer, args)
+        for rc in customers:
+            print("W_ID = {}, D_ID = {}, C_ID = {}".format(rc.r_w_id, rc.r_d_id, rc.r_c_id))
 
-    # def slow_run(self):
-    #     args = [self.w_id, self.d_id, self.c_id]
-    #     customer_orders = utils.select(self.session, self.query.select_customer_order, args)
-    #     items_list = [row.co_i_ids for row in customer_orders]
-    #     for w in range(1, 11):
-    #         if w == self.w_id:
-    #             continue
-    #         for d in range(1, 11):
-    #             query = "SELECT * FROM CS5424.customer_order where co_w_id = %s and co_d_id = %s"
-    #             args = [w, d]
-    #             orders = utils.select(self.session, query, args)
-    #             for o in orders:
-    #                 if self.isOverlap(items_list, o.co_i_ids):
-    #                     print("W_ID = {}, D_ID = {}, C_ID = {}".format(w, d, o.co_c_id))
-    #
-    # def isOverlap(self, item_list, target):
-    #     for item in item_list:
-    #         if len(set(item).intersection(set(target))) >= 2:
-    #             return True
-    #     return False
+    def run(self):
+        if self.workload == 'A':
+            self.find_related_customers_A(self.w_id, self.d_id, self.c_id)
+        elif self.workload == 'B':
+            self.find_related_customer_B(self.w_id, self.d_id, self.c_id)
+

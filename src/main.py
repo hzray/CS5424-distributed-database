@@ -11,10 +11,11 @@ from transactions.cql.QueryPrepare import PreparedQuery
 
 
 def main():
-    if len(sys.argv) < 2:
-        sys.exit('Must pass client number')
+    if len(sys.argv) < 3:
+        sys.exit('Must pass workload number and client number')
 
-    client_id = sys.argv[1]
+    workload = sys.argv[1]
+    client_id = sys.argv[2]
     read_profile = ExecutionProfile(consistency_level=ConsistencyLevel.QUORUM, request_timeout=1000.0)
     write_profile = ExecutionProfile(consistency_level=ConsistencyLevel.QUORUM, request_timeout=1000.0)
     exec_profile = {'read': read_profile, 'write': write_profile}
@@ -35,7 +36,7 @@ def main():
         xact_time_start = time.time()
         success = True
         if command == 'N':
-            new_order_handler = NewOrder.NewOrderHandler(session, query, *args[1:])
+            new_order_handler = NewOrder.NewOrderHandler(session, query, workload, *args[1:])
             if not new_order_handler.run():
                 success = False
         elif command == 'P':
@@ -59,7 +60,7 @@ def main():
             top_balance_handler = TopBalance.TopBalanceHandler(session, query)
             top_balance_handler.run()
         elif command == 'R':
-            related_customer_handler = RelatedCustomer.RelatedCustomerHandler(session, query, *args[1:])
+            related_customer_handler = RelatedCustomer.RelatedCustomerHandler(session, query, workload, *args[1:])
             related_customer_handler.run()
         xact_time_end = time.time()
         if success:
