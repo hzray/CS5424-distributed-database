@@ -1,6 +1,5 @@
 import decimal
 from datetime import datetime
-import time
 
 
 class OrderItem:
@@ -62,9 +61,8 @@ class Customer:
               .format(self.w_id, self.d_id, self.c_id, self.c_last, self.c_credit, self.c_discount))
 
 
-class NewOrder:
-    def __init__(self, conn, c_id, w_id, d_id, num_items, file):
-        self.file = file
+class NewOrder1:
+    def __init__(self, conn, c_id, w_id, d_id, num_items):
         self.conn = conn
         self.c_id = int(c_id)
         self.w_id = int(w_id)
@@ -82,8 +80,8 @@ class NewOrder:
     def new_order_input(self):
         for i in range(0, int(self.num_items)):
             # line = input('item: ' + str(i) + ', please input the information of item: ')
-            # line = input()
-            line = self.file.readline()
+            line = input()
+            # line = self.file.readline()
             item = line.split(',')
             self.items.append(OrderItem(item[0], item[1], item[2]))
 
@@ -101,8 +99,8 @@ class NewOrder:
             index += 1
 
     def new_order_handler(self):
-        start = time.time()
         self.new_order_input()
+
         self.customer.select_c_info(self.conn)
 
         with self.conn.cursor() as cur:
@@ -195,6 +193,3 @@ class NewOrder:
             index += 1
 
         self.new_order_output()
-        end = time.time()
-        latency = start - end
-        return latency
