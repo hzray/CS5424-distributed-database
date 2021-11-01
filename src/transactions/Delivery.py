@@ -26,10 +26,7 @@ class DeliveryHandler:
 
     def update_customer(self, w_id, d_id, c_id, balance, cnt):
         args = [balance, cnt, w_id, d_id, c_id]
-        result = utils.update(self.session, self.query.update_customer_delivery, args)
-        if result.applied:
-            return True
-        return False
+        utils.update(self.session, self.query.update_customer_delivery, args)
 
     def select_customer(self, w_id, d_id, c_id):
         args = [w_id, d_id, c_id]
