@@ -51,28 +51,18 @@ class NewOrderHandler:
                 counter += 1
         return None
 
-    def adjust_stock_quantity(self, item, w_id):
-        quantity = item.quantity
-        counter = 0
-        while counter < 3:
-            stock = self.select_stock(item.supplier_id, item.Id)
-            old_quantity = stock.s_quantity
-            qty = old_quantity - quantity
-            if qty < 10:
-                qty += 100
-
-            ytd = stock.s_ytd + quantity
-            order_cnt = stock.s_order_cnt + 1
-            remote_cnt = stock.s_remote_cnt
-            if w_id != stock.s_w_id:
-                remote_cnt += 1
-            args = [qty, ytd, order_cnt, remote_cnt, stock.s_w_id, stock.s_i_id, old_quantity]
-            result = utils.update(self.session, self.query.update_stock, args)
-            if result.applied:
-                return stock, qty
-            else:
-                counter += 1
-        return None, None
+    def update_stock(self, stock, w_id, quantity):
+        qty = stock.s_quantity - quantity
+        if qty < 10:
+            qty += 100
+        ytd = stock.s_ytd + quantity
+        order_cnt = stock.s_order_cnt + 1
+        remote_cnt = stock.s_remote_cnt
+        if w_id != stock.s_w_id:
+            remote_cnt += 1
+        args = [qty, ytd, order_cnt, remote_cnt, stock.s_w_id, stock.s_i_id]
+        utils.update(self.session, self.query.update_stock, args)
+        return qty
 
     def insert_order_line(self, w_id, d_id, o_id, i, i_id, t, sup_id, qty, item_amount, dist_info):
         args = [w_id, d_id, o_id, i, i_id, t, item_amount, sup_id, qty, dist_info]
@@ -164,9 +154,8 @@ class NewOrderHandler:
             item.price = item_info.i_price
             item.name = item_info.i_name
 
-            (stock, adjusted_quantity) = self.adjust_stock_quantity(item, self.w_id)
-            if stock is None:
-                return False
+            stock = self.select_stock(item.supplier_id, item.Id)
+            adjusted_quantity = self.update_stock(stock, self.w_id, item.quantity)
             item.stock_quantity = adjusted_quantity
 
             item_amount = item.price * item.quantity
