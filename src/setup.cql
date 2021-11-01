@@ -6,7 +6,6 @@ CREATE KEYSPACE IF NOT EXISTS CS5424
     'replication_factor' : 3
   };
 
-USE CS5424;
 
 CREATE TABLE IF NOT EXISTS CS5424.warehouse (
   W_ID int,
