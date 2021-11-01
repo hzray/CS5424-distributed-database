@@ -32,24 +32,16 @@ class PaymentHandler:
         args = [w_id, d_id, c_id]
         return utils.select_one(self.session, self.query.select_customer, args)
 
-    def update_customer(self, w_id, d_id, c_id, balance, ytd_payment, payment_cnt, old_balance):
-        args = [balance, ytd_payment, payment_cnt, w_id, d_id, c_id, old_balance]
-        result = utils.update(self.session, self.query.update_customer_payment, args)
-        if result.applied:
-            return True
-        return False
+    def update_customer(self, w_id, d_id, c_id, balance, ytd_payment, payment_cnt):
+        args = [balance, ytd_payment, payment_cnt, w_id, d_id, c_id]
+        utils.update(self.session, self.query.update_customer_payment, args)
 
     def select_and_update_customer(self, w_id, d_id, c_id):
-        counter = 0
-        while counter < 3:
-            customer = self.select_customer(w_id, d_id, c_id)
-            if self.update_customer(w_id, d_id, c_id, customer.c_balance - self.payment,
-                                    customer.c_ytd_payment + self.payment, customer.c_payment_cnt + 1,
-                                    customer.c_balance):
-                return customer
-            else:
-                counter += 1
-        return None
+        customer = self.select_customer(w_id, d_id, c_id)
+        self.update_customer(w_id, d_id, c_id, customer.c_balance - self.payment,
+                             customer.c_ytd_payment + self.payment, customer.c_payment_cnt + 1)
+        customer = self.select_customer(w_id, d_id, c_id)
+        return customer
 
     def run(self):
         # Step 1
@@ -62,8 +54,6 @@ class PaymentHandler:
 
         # Step 3
         customer = self.select_and_update_customer(self.w_id, self.d_id, self.c_id)
-        if not customer:
-            return False
 
         # Output
         customer_output = "customer: W_ID = {}, D_ID = {}, C_ID = {}, C_FIRST = {}, C_MIDDLE = {}, C_LAST = {}, " \
@@ -90,5 +80,3 @@ class PaymentHandler:
         print(district_address)
 
         print("payment = {}".format(self.payment))
-
-        return True

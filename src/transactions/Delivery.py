@@ -24,8 +24,8 @@ class DeliveryHandler:
         args = [t, w_id, d_id, o_id, ol_number]
         utils.update(self.session, self.query.update_ol_deliver_d, args)
 
-    def update_customer(self, w_id, d_id, c_id, balance, cnt, old_balance):
-        args = [balance, cnt, w_id, d_id, c_id, old_balance]
+    def update_customer(self, w_id, d_id, c_id, balance, cnt):
+        args = [balance, cnt, w_id, d_id, c_id]
         result = utils.update(self.session, self.query.update_customer_delivery, args)
         if result.applied:
             return True
@@ -44,17 +44,12 @@ class DeliveryHandler:
         return amount
 
     def select_and_update_customer(self, w_id, d_id, c_id, o_id):
-        counter = 0
-        while counter < 3:
-            customer = self.select_customer(w_id, d_id, c_id)
-            balance = customer.c_balance
-            delivery_cnt = customer.c_delivery_cnt
-            total_order_amount = self.sum_order_amount(self.w_id, d_id, o_id)
-            if self.update_customer(w_id, d_id, customer.c_id, balance + total_order_amount, delivery_cnt + 1, balance):
-                return True
-            else:
-                counter += 1
-        return False
+
+        customer = self.select_customer(w_id, d_id, c_id)
+        balance = customer.c_balance
+        delivery_cnt = customer.c_delivery_cnt
+        total_order_amount = self.sum_order_amount(self.w_id, d_id, o_id)
+        self.update_customer(w_id, d_id, customer.c_id, balance + total_order_amount, delivery_cnt + 1)
 
     def run(self):
         for d_id in range(1, 11):

@@ -5,10 +5,11 @@ from transactions.cql.QueryPrepare import PreparedQuery
 
 
 def main():
-    cluster = Cluster(['127.0.0.1'], 6042)
+    cluster = Cluster(['127.0.0.1'], 9042)
     session = cluster.connect()
-    query = PreparedQuery(session)
-    new_order_handler = NewOrder.NewOrderHandler(session, query, 'A', 1207, 3, 10, 5)
-    new_order_handler.run()
+    sql = "select * from cs5424.warehouse"
+    result = session.execute(sql, []).one()
+    result.w_id = 100
+    print(result)
 
 main()

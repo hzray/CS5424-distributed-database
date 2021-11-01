@@ -39,17 +39,11 @@ class NewOrderHandler:
         self.n_item = int(n_item)
 
     def select_and_update_district(self, w_id, d_id):
-        counter = 0
-        while counter < 3:
-            district = self.select_district(w_id, d_id)
-            o_id = district.d_next_o_id
-            args = [o_id + 1, w_id, d_id, o_id]
-            result = utils.update(self.session, self.query.update_next_o_id, args)
-            if result.applied:
-                return district
-            else:
-                counter += 1
-        return None
+        district = self.select_district(w_id, d_id)
+        o_id = district.d_next_o_id
+        args = [o_id + 1, w_id, d_id]
+        utils.update(self.session, self.query.update_next_o_id, args)
+        return district
 
     def update_stock(self, stock, w_id, quantity):
         qty = stock.s_quantity - quantity
@@ -129,8 +123,6 @@ class NewOrderHandler:
         # Step 1 and 2
 
         district = self.select_and_update_district(self.w_id, self.d_id)
-        if district is None:
-            return False
 
         o_id = district.d_next_o_id
 
@@ -211,4 +203,3 @@ class NewOrderHandler:
         # if workload = B, update related customer
         if self.workload == 'B':
             self.update_related_customer(self.w_id, self.d_id, self.c_id, [item.Id for item in items])
-        return True

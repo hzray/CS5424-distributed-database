@@ -40,7 +40,6 @@ def main():
     total_time_start = time.time()
     latencies = []
     success_count = 0
-    fail_count = 0
     while True:
         line = sys.stdin.readline()
         if not line:
@@ -48,19 +47,15 @@ def main():
         args = line.split(",")
         command = args[0]
         xact_time_start = time.time()
-        success = True
         if command == 'N':
             new_order_handler = NewOrder.NewOrderHandler(session, query, workload, *args[1:])
-            if not new_order_handler.run():
-                success = False
+            new_order_handler.run()
         elif command == 'P':
             payment_handler = Payment.PaymentHandler(session, query, *args[1:])
-            if not payment_handler.run():
-                success = False
+            payment_handler.run()
         elif command == 'D':
             delivery_handler = Delivery.DeliveryHandler(session, query, *args[1:])
-            if not delivery_handler.run():
-                success = False
+            delivery_handler.run()
         elif command == 'O':
             order_status_handler = OrderStatus.OrderStatusHandler(session, query, *args[1:])
             order_status_handler.run()
@@ -77,11 +72,9 @@ def main():
             related_customer_handler = RelatedCustomer.RelatedCustomerHandler(session, query, workload, *args[1:])
             related_customer_handler.run()
         xact_time_end = time.time()
-        if success:
-            success_count += 1
-            latencies.append((xact_time_end - xact_time_start) * 1000)
-        else:
-            fail_count += 1
+
+        success_count += 1
+        latencies.append((xact_time_end - xact_time_start) * 1000)
         print()
 
     total_time_end = time.time()
