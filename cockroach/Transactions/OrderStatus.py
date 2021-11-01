@@ -1,5 +1,6 @@
 import time
-
+import psycopg2
+import random
 
 class Customer:
     def __init__(self, c_first, c_middle, c_last, c_balance):
@@ -26,16 +27,17 @@ class OrderLine:
 
 
 class OrderStatus:
-    def __init__(self, conn, c_w_id, c_d_id, c_id):
+    def __init__(self, conn, c_w_id, c_d_id, c_id, fo):
         self.conn = conn
         self.c_w_id = c_w_id
         self.c_d_id = c_d_id
         self.c_id = c_id
+        self.fo = fo
 
         self.last_o_id = 0
+        self.output_str = ""
 
     def order_status_handler(self):
-        start = time.time()
         # step 1
         with self.conn.cursor() as cur:
             cur.execute("""SELECT C_FIRST, C_MIDDLE, C_LAST, C_BALANCE FROM CS5424.customer 
@@ -44,8 +46,8 @@ class OrderStatus:
             rows = cur.fetchall()
         self.conn.commit()
         for row in rows:
-            print("Customer's name: {} {} {}".format(row[0], row[1], row[2]))
-            print("Customer's balance: {}".format(row[3]))
+            self.output_str += "\nCustomer's name: {} {} {}".format(row[0], row[1], row[2]) + \
+                               "\nCustomer's balance: {}".format(row[3])
             break
         # step 2
         with self.conn.cursor() as cur:
@@ -55,9 +57,8 @@ class OrderStatus:
             rows = cur.fetchall()
         self.conn.commit()
         for row in rows:
-            print("Customer's last order:")
-            print("Order number: {}, entry date and time: {}, carrier identifer: {}"
-                  .format(row[0], row[1], row[2]))
+            self.output_str += "Order number: {}, entry date and time: {}, carrier identifer: {}". \
+                                   format(row[0], row[1], row[2])
             self.last_o_id = row[0]
             break
         # step 3
@@ -68,12 +69,10 @@ class OrderStatus:
             rows = cur.fetchall()
         self.conn.commit()
         i = 0
-        print("Each item in the customer's last order: ")
+        self.output_str += "\nEach item in the customer's last order: "
         for row in rows:
             i += 1
-            print("{}. item number: {}, supplying warehouse number: {}, quantity ordered: {}， "\
-                  "total price for ordered item: {}, data and time of delivery: {}"
-                  .format(i, row[0], row[1], row[2], row[3], row[4]))
-        end = time.time()
-        latency = start - end
-        return latency
+            self.output_str += "\n{}. OL_I_ID: {}, OL_SUPPLY_W_ID: {}, OL_QUANTITY: {}, "\
+                               "OL_AMOUNT: {}, OL_DELIVERY_D: {}". \
+                                   format(i, row[0], row[1], row[2], row[3], row[4])
+        print(self.output_str, file=self.fo)

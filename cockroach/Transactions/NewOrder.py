@@ -1,6 +1,8 @@
 import decimal
-from datetime import datetime
+import psycopg2
+import random
 import time
+from datetime import datetime
 
 
 class OrderItem:
@@ -27,10 +29,23 @@ class OrderItem:
                 break
         conn.commit()
 
-    def print_item_info(self, index):
-        print("   {}. item number: {}, item name: {}, supplier warehouse: {}, "
-              "quantity: {}, order line amount: {}, stock quantity: {} "
-              .format(str(index), self.item_id, self.name, self.warehouse_id, self.quantity, self.ol_amount, self.s_quantity))
+    def item_info_str(self, index):
+        output_str = "    {}. item number: {}, item name: {}, supplier warehouse: {}, " \
+                     "quantity: {}, order line amount: {}, stock quantity: {} ". \
+            format(str(index), self.item_id, self.name, self.warehouse_id, self.quantity,
+                   self.ol_amount, self.s_quantity)
+        return output_str
+
+
+def new_order_input(lines, num_items):
+    items = []
+    for i in range(0, int(num_items)):
+        # line = input('item: ' + str(i) + ', please input the information of item: ')
+        # line = input()
+        line = lines[i]
+        item = line.split(',')
+        items.append(OrderItem(item[0], item[1], item[2]))
+    return items
 
 
 class Customer:
@@ -57,14 +72,11 @@ class Customer:
                 break
         conn.commit()
 
-    def print_c_info(self):
-        print("w_id: {}, d_id: {}, c_id: {}, lastname: {}, credit: {}, discount: {}"
-              .format(self.w_id, self.d_id, self.c_id, self.c_last, self.c_credit, self.c_discount))
-
 
 class NewOrder:
-    def __init__(self, conn, c_id, w_id, d_id, num_items, file):
-        self.file = file
+    def __init__(self, conn, c_id, w_id, d_id, num_items, items, file_out):
+        self.items = items
+        self.file_out = file_out
         self.conn = conn
         self.c_id = int(c_id)
         self.w_id = int(w_id)
@@ -77,34 +89,29 @@ class NewOrder:
         self.o_id = 0
         self.o_entry_d = datetime.now()
         self.total_amount = 0
-        self.items = []
-
-    def new_order_input(self):
-        for i in range(0, int(self.num_items)):
-            # line = input('item: ' + str(i) + ', please input the information of item: ')
-            # line = input()
-            line = self.file.readline()
-            item = line.split(',')
-            self.items.append(OrderItem(item[0], item[1], item[2]))
 
     def new_order_output(self):
-        print("1. customer information: w_id: {}, d_id: {}, c_id: {}, lastname: {}, credit: {}, discount: {}"
-              .format(self.w_id, self.d_id, self.c_id, self.customer.c_last,
-                      self.customer.c_credit, self.customer.c_discount))
-        print("2. warehouse tax rate: {}, district tax rate: {}".format(self.w_tax, self.d_tax))
-        print("3. order number: {}, entry date: {}".format(self.o_id, self.o_entry_d))
-        print("4. number of items: {}, total amount for order: {}".format(self.num_items, self.total_amount))
-        print("5. items information: ")
+        output_str = "\n1. customer information: w_id: {}, d_id: {}, c_id: {}, lastname: {}, credit: {}, discount: {}". \
+                         format(self.w_id, self.d_id, self.c_id, self.customer.c_last, self.customer.c_credit,
+                                self.customer.c_discount) + \
+                     "\n2. warehouse tax rate: {}, district tax rate: {}".format(self.w_tax, self.d_tax) + \
+                     "\n3. order number: {}, entry date: {}".format(self.o_id, self.o_entry_d) + \
+                     "\n4. number of items: {}, total amount for order: {}".format(self.num_items, self.total_amount) + \
+                     "\n5. items information: "
         index = 0
         for item in self.items:
-            item.print_item_info(index)
+            output_str += "\n" + item.item_info_str(index)
             index += 1
+        print(output_str, file=self.file_out)
 
     def new_order_handler(self):
-        start = time.time()
-        self.new_order_input()
-        self.customer.select_c_info(self.conn)
+        self.new_order_transaction()
+        self.new_order_output()
 
+
+    def new_order_transaction(self):
+        start = time.time()
+        self.customer.select_c_info(self.conn)
         with self.conn.cursor() as cur:
             cur.execute("SELECT W_TAX FROM CS5424.warehouse WHERE W_ID = %s", (self.w_id,))
             rows = cur.fetchall()
@@ -194,7 +201,6 @@ class NewOrder:
             self.total_amount = self.total_amount * (1 + self.d_tax + self.w_tax) * (1 - self.customer.c_discount)
             index += 1
 
-        self.new_order_output()
         end = time.time()
-        latency = start - end
+        latency = end - start
         return latency

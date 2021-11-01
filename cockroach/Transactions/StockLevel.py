@@ -1,20 +1,21 @@
 import time
-
+import psycopg2
+import random
 
 class StockLevel:
-    def __init__(self, conn, w_id, d_id, t, l):
+    def __init__(self, conn, w_id, d_id, t, l, fo):
         self.conn = conn
         self.w_id = w_id
         self.d_id = d_id
         self.t = t
         self.l = l
+        self.fo = fo
 
         self.n = 0
         self.s = []
         self.number = 0
 
     def stock_level_handler(self):
-        start = time.time()
         # step 1
         with self.conn.cursor() as cur:
             cur.execute("""SELECT D_NEXT_O_ID FROM CS5424.district WHERE D_W_ID = %s AND D_ID = %s""",
@@ -49,8 +50,5 @@ class StockLevel:
             break
         self.conn.commit()
 
-        print("the total number of items, whose stock quantity is below " \
-              "the threshold, from last L orders: {}".format(self.number))
-        end = time.time()
-        latency = start - end
-        return latency
+        print("the total number of items: {}".format(self.number), file=self.fo)
+

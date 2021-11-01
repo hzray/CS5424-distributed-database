@@ -1,28 +1,32 @@
 import time
-
+import psycopg2
+import random
 
 class RelatedCustomer:
-    def __init__(self, conn, c_w_id, c_d_id, c_id):
+    def __init__(self, conn, c_w_id, c_d_id, c_id, fo):
         self.conn = conn
         self.c_w_id = int(c_w_id)
         self.c_d_id = int(c_d_id)
         self.c_id = int(c_id)
+        self.fo = fo
+
+        self.output_str = ""
 
     def relatedCustomer_handler(self):
-        start = time.time()
-        print("1. Customer identifier: c_w_id = {}, c_d_id = {}, c_id = {}".format(self.c_w_id, self.c_d_id, self.c_id))
+        self.output_str += "\n1. Customer identifier: c_w_id = {}, c_d_id = {}, c_id = {}". \
+            format(self.c_w_id, self.c_d_id, self.c_id)
         orders = self.find_orders()
-        print("2. For each customer: ")
+        self.output_str += "\n2. For each customer: "
         for order in orders:
             items = self.find_items(order[0])
             related_customers = self.find_related_customers(items)
 
             # output:
             for customer in related_customers:
-                print("Customer Identifier: w_id = {}, d_id = {}, c_id = {}".format(customer[0], customer[1], customer[2]))
-        end = time.time()
-        latency = start - end
-        return latency
+                self.output_str += "\nCustomer Identifier: w_id = {}, d_id = {}, c_id = {}".\
+                    format(customer[0], customer[1], customer[2])
+        print(self.output_str, file=self.fo)
+
 
     def find_orders(self):
         with self.conn.cursor() as cur:
@@ -55,7 +59,7 @@ class RelatedCustomer:
             self.conn.commit()
 
             for row in rows:
-                if(row[3] >= 2):
+                if (row[3] >= 2):
                     c_id = self.find_customer(row[0], row[1], row[2])
                     customer = (row[0], row[1], c_id[0])
                     related_customers.append(customer)

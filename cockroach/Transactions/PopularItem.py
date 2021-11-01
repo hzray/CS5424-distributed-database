@@ -1,14 +1,17 @@
 import time
-
+import psycopg2
+import random
 
 class PopularItem:
-    def __init__(self, conn, w_id, d_id, l):
+    def __init__(self, conn, w_id, d_id, l, fo):
         self.conn = conn
         self.w_id = int(w_id)
         self.d_id = int(d_id)
         self.l = int(l)
+        self.fo = fo
 
         self.d_next_o_id = 0
+        self.output_str = ""
 
     def select_district(self):
         with self.conn.cursor() as cur:
@@ -51,13 +54,15 @@ class PopularItem:
 
     def select_order_lines(self, o_id):
         ol_quantity = self.get_max_quantity(o_id)
+        rows = []
         if len(ol_quantity) > 0:
             with self.conn.cursor() as cur:
                 cur.execute(
-                    "Select ol_i_id, ol_quantity from CS5424.order_line where ol_w_id = %s and ol_d_id = %s and ol_o_id = %s and ol_quantity = %s",
+                    "Select ol_i_id, ol_quantity from CS5424.order_line where ol_w_id = %s and ol_d_id = %s "
+                    "and ol_o_id = %s and ol_quantity = %s",
                     [self.w_id, self.d_id, o_id, ol_quantity[0]])
                 rows = cur.fetchall()
-                self.conn.commit()
+            self.conn.commit()
         return rows
 
     def select_item(self, item_id):
@@ -70,9 +75,8 @@ class PopularItem:
             return item
 
     def popularItem_handler(self):
-        start = time.time()
-        print("1. District identifier: w_id = {}, d_id = {}".format(self.w_id, self.d_id))
-        print("2. Number of last orders to be examined: l = {}".format(self.l))
+        self.output_str += "\n1. District identifier: w_id = {}, d_id = {}".format(self.w_id, self.d_id) + \
+                           "\n2. Number of last orders to be examined: l = {}".format(self.l)
 
         # step 1
         self.d_next_o_id = self.select_district()
@@ -86,12 +90,14 @@ class PopularItem:
         orders = self.select_orders(o_id_list)
 
         # step 3
-        print("3. Orders Information: ")
+        self.output_str += "\n3. Orders Information: "
         items = {}
         for order in orders:
-            print("Order number: o_id = {}， entry date and time: o_entry_d = {}".format(order[0], order[2]))
+            self.output_str += "\nOrder number: o_id = {}, entry date and time: o_entry_d = {}".\
+                format(order[0], order[2])
             customer = self.select_customer(order[1])
-            print("Name of customer: c_first = {}, c_middle = {}, c_last = {}".format(customer[0], customer[1], customer[2]))
+            self.output_str += "\nName of customer: c_first = {}, c_middle = {}, c_last = {}".\
+                format(customer[0], customer[1], customer[2])
 
             order_lines = self.select_order_lines(order[0])
 
@@ -101,13 +107,12 @@ class PopularItem:
                 item_name = item[0]
                 item_count = items.get(item_name) if item_name in items else 0
                 items.update({item_name: item_count + 1})
-                print("Item name: i_name = {}, Quantity order: ol_quantity = {}".format(item_name, order_line[1]))
+                self.output_str += "\nItem name: i_name = {}, Quantity order: ol_quantity = {}".\
+                    format(item_name, order_line[1])
 
         distinct_items = set(items.keys())
-        print("4. The percentage of examined orders:")
+        self.output_str += "\n4. The percentage of examined orders:"
         for item in distinct_items:
             percentage = float(items.get(item)) / (float(1) * 100.0)
-            print("Item name: i_name = {}, the percentage = {}".format(item, percentage))
-        end = time.time()
-        latency = start - end
-        return latency
+            self.output_str += "Item name: i_name = {}, the percentage = {}".format(item, percentage)
+        print(self.output_str, file=self.fo)

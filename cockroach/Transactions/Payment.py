@@ -1,13 +1,15 @@
 import time
-
+import psycopg2
+import random
 
 class Payment:
-    def __init__(self, conn, c_w_id, c_d_id, c_id, payment):
+    def __init__(self, conn, c_w_id, c_d_id, c_id, payment, fo):
         self.conn = conn
         self.c_w_id = c_w_id
         self.c_d_id = c_d_id
         self.c_id = c_id
         self.payment = payment
+        self.fo = fo
 
         self.w_ytd = 0
         self.d_ytd = 0
@@ -16,8 +18,9 @@ class Payment:
         self.c_ytd_payment = 0
         self.c_payment_cnt = 0
 
+        self.output_str = ""
+
     def payment_handler(self):
-        start = time.time()
         with self.conn.cursor() as cur:
             # step1
             cur.execute("UPDATE CS5424.warehouse SET W_YTD = W_YTD + %s WHERE W_ID = %s", (self.payment, self.c_w_id))
@@ -42,15 +45,14 @@ class Payment:
             rows = cur.fetchall()
         self.conn.commit()
         for row in rows:
-            print("Customer's identifier: C_W_ID = {}, C_D_ID = {}, C_ID = {}"
-                  .format(self.c_w_id, self.c_d_id, self.c_id))
-            print("Customer's name: {} {} {}".format(row[0], row[1], row[2]))
-            print("Customer's address: {}, {}, {}, {}, {}"
-                  .format(row[3], row[4], row[5], row[6], row[7]))
-            customer_str = "C_PHONE = {},"\
-                           " C_SINCE = {}, C_CREDIT = {}, C_CREDIT_LIM = {}, C_DISCOUNT = {}, C_BALANCE = {}"\
-                .format(row[8], row[9], row[10], row[11], row[12], row[13])
-            print(customer_str)
+            self.output_str += "\nCustomer's identifier: C_W_ID = {}, C_D_ID = {}, C_ID = {}". \
+                                   format(self.c_w_id, self.c_d_id, self.c_id) + \
+                               "\nCustomer's name: {} {} {}".format(row[0], row[1], row[2]) + \
+                               "\nCustomer's address: {}, {}, {}, {}, {}". \
+                                   format(row[3], row[4], row[5], row[6], row[7]) + \
+                               "\nC_PHONE = {},"\
+                               "\nC_SINCE = {}, C_CREDIT = {}, C_CREDIT_LIM = {}, C_DISCOUNT = {}, C_BALANCE = {}" \
+                                   .format(row[8], row[9], row[10], row[11], row[12], row[13])
             break
 
         with self.conn.cursor() as cur:
@@ -59,7 +61,8 @@ class Payment:
             rows = cur.fetchall()
         self.conn.commit()
         for row in rows:
-            print("Warehouse's address: {}, {}, {}, {}, {}".format(row[0], row[1], row[2], row[3], row[4]))
+            self.output_str += "\nWarehouse's address: {}, {}, {}, {}, {}". \
+                format(row[0], row[1], row[2], row[3], row[4])
             break
         with self.conn.cursor() as cur:
             cur.execute("""SELECT D_STREET_1, D_STREET_2, D_CITY, D_STATE, D_ZIP 
@@ -68,9 +71,8 @@ class Payment:
             rows = cur.fetchall()
         self.conn.commit()
         for row in rows:
-            print("District's address: {}, {}, {}, {}, {}".format(row[0], row[1], row[2], row[3], row[4]))
+            self.output_str += "\nDistrict's address: {}, {}, {}, {}, {}". \
+                format(row[0], row[1], row[2], row[3], row[4])
             break
-        print("Payment amount: {}".format(self.payment))
-        end = time.time()
-        latency = start - end
-        return latency
+        self.output_str += "\nPayment amount: {}".format(self.payment)
+        print(self.output_str, file=self.fo)
