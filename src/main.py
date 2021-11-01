@@ -9,6 +9,7 @@ from transactions import OrderStatus, Payment, StockLevel, RelatedCustomer, Deli
 from cassandra.cluster import Cluster, ExecutionProfile
 from transactions.cql.QueryPrepare import PreparedQuery
 
+PROJECT_PATH = "/home/stuproj/cs4224m/cs5424_cassandra"
 
 def main():
     if len(sys.argv) < 3:
@@ -87,7 +88,7 @@ def main():
     print("95th percentile transactions latency = {:.2f} ms".format(ninety_five_percentile))
     print("99th percentile transactions latency = {:.2f} ms".format(ninety_nine_percentile))
 
-    f = open('../output/client_measurement/{}.csv'.format(client_id), 'w')
+    f = open(f'{PROJECT_PATH}/output/workload{workload}/measurement/{client_id}.csv', 'w')
     writer = csv.writer(f)
     row = [client_id, success_count, total_time, throughput, average_latency, median_latency, ninety_five_percentile,
            ninety_nine_percentile]

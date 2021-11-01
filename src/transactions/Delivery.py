@@ -59,6 +59,8 @@ class DeliveryHandler:
     def run(self):
         for d_id in range(1, 11):
             smallest_order = self.find_smallest_order(self.w_id, d_id)
+            if smallest_order is None:
+                continue
             o_id = smallest_order.o_id
             print("w_id = {}, d_id={}, o_id={}".format(self.w_id, d_id, o_id))
             self.update_order_carrier_id(self.w_id, d_id, o_id, self.carrier_id)
