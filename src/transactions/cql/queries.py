@@ -2,7 +2,7 @@ update_district_next_o_id = "UPDATE CS5424.district SET d_next_o_id = ? WHERE d_
                             "= ? "
 
 update_stock = "UPDATE CS5424.stock SET s_quantity = ?, s_ytd =  ?, s_order_cnt = ?, s_remote_cnt = ? " \
-               "WHERE s_w_id = ? AND s_i_id = ? IF s_quantity = ?"
+               "WHERE s_w_id = ? AND s_i_id = ?"
 
 update_warehouse_ytd = "UPDATE CS5424.warehouse SET w_ytd = ? where w_id = ?"
 
