@@ -17,9 +17,22 @@ def main():
 
     workload = sys.argv[1]
     client_id = sys.argv[2]
-    read_profile = ExecutionProfile(consistency_level=ConsistencyLevel.QUORUM, request_timeout=1000.0)
-    write_profile = ExecutionProfile(consistency_level=ConsistencyLevel.QUORUM, request_timeout=1000.0)
-    exec_profile = {'read': read_profile, 'write': write_profile}
+    cons_level = sys.argv[3]
+    if cons_level == 'ROWA':
+        read_profile = ExecutionProfile(consistency_level=ConsistencyLevel.ONE, request_timeout=1000.0)
+        write_profile = ExecutionProfile(consistency_level=ConsistencyLevel.ALL, request_timeout=1000.0)
+        exec_profile = {'read': read_profile, 'write': write_profile}
+    elif cons_level == 'QUORUM':
+        read_profile = ExecutionProfile(consistency_level=ConsistencyLevel.QUORUM, request_timeout=1000.0)
+        write_profile = ExecutionProfile(consistency_level=ConsistencyLevel.QUORUM, request_timeout=1000.0)
+        exec_profile = {'read': read_profile, 'write': write_profile}
+    else:
+        print("Using Default ConsistencyLevel Plan: QUORUM")
+        read_profile = ExecutionProfile(consistency_level=ConsistencyLevel.QUORUM, request_timeout=1000.0)
+        write_profile = ExecutionProfile(consistency_level=ConsistencyLevel.QUORUM, request_timeout=1000.0)
+        exec_profile = {'read': read_profile, 'write': write_profile}
+
+
     cluster = Cluster(['127.0.0.1'], 6042, execution_profiles=exec_profile)
     session = cluster.connect()
     query = PreparedQuery(session)
