@@ -130,12 +130,9 @@ CREATE TABLE IF NOT EXISTS CS5424.customer_order_items (
   coi_c_id int,
   coi_o_id int,
   coi_i_id int,
-  PRIMARY KEY ((coi_w_id, coi_d_id), coi_c_id, coi_o_id, coi_i_id)
+  PRIMARY KEY ((coi_w_id, coi_d_id), coi_i_id, coi_c_id, coi_o_id)
 )
-WITH CLUSTERING ORDER BY (coi_c_id ASC, coi_o_id ASC, coi_i_id ASC);
-
-CREATE INDEX IF NOT EXISTS item_index
-  ON CS5424.customer_order_items (coi_i_id);
+WITH CLUSTERING ORDER BY (coi_i_id ASC, coi_c_id ASC, coi_o_id ASC);
 
 CREATE TABLE IF NOT EXISTS CS5424.customer_order (
     co_w_id int,
@@ -159,21 +156,21 @@ CREATE TABLE IF NOT EXISTS CS5424.related_customer (
 WITH CLUSTERING ORDER BY (c_id ASC);
 
 
-CREATE TABLE CS5424.warehouse_counter (
+CREATE TABLE IF NOT EXISTS CS5424.warehouse_counter (
   W_ID int,
   W_YTD_CHANGE counter,
   PRIMARY KEY (W_ID)
 );
 
-CREATE TABLE CS5424.district_counter (
+CREATE TABLE IF NOT EXISTS CS5424.district_counter (
   D_W_ID int,
   D_ID int,
   D_O_ID_CHANGE counter,
-  D_YDT_CHANGE counter,
+  D_YTD_CHANGE counter,
   PRIMARY KEY ((D_W_ID, D_ID))
 );
 
-CREATE TABLE CS5424.stock_counter (
+CREATE TABLE IF NOT EXISTS CS5424.stock_counter (
   S_W_ID int,
   S_I_ID int,
   S_YTD_CHANGE counter,
@@ -183,7 +180,7 @@ CREATE TABLE CS5424.stock_counter (
 )
 WITH CLUSTERING ORDER BY (S_I_ID ASC);
 
-CREATE TABLE CS5424.customer_counter (
+CREATE TABLE  IF NOT EXISTS CS5424.customer_counter (
   C_W_ID int,
   C_D_ID int,
   C_ID int,
