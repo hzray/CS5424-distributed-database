@@ -17,7 +17,7 @@ class PaymentHandler:
         return utils.select_one(self.session, self.query.select_warehouse, args)
 
     def update_warehouse_ytd_change(self, w_id, payment):
-        args = [payment, w_id]
+        args = [int(payment*100), w_id]
         utils.update(self.session, self.query.update_warehouse_ytd_change, args)
 
     def select_district(self, w_id, d_id):
@@ -25,7 +25,7 @@ class PaymentHandler:
         return utils.select_one(self.session, self.query.select_district, args)
 
     def update_district_ytd_change(self, w_id, d_id, payment):
-        args = [payment, w_id, d_id]
+        args = [int(payment*100), w_id, d_id]
         utils.update(self.session, self.query.update_district_ytd_change, args)
 
     def select_customer(self, w_id, d_id, c_id):
@@ -33,7 +33,7 @@ class PaymentHandler:
         return utils.select_one(self.session, self.query.select_customer, args)
 
     def update_customer_counters(self, w_id, d_id, c_id, payment):
-        args = [payment, payment, w_id, d_id, c_id]
+        args = [int(payment*100), int(payment*100), w_id, d_id, c_id]
         utils.update(self.session, self.query.update_customer_payment_counters, args)
 
     def run(self):

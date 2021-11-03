@@ -4,7 +4,7 @@ update_district_o_id_counter = "UPDATE CS5424.district_counter SET d_o_id_change
 update_stock_quantity = "UPDATE CS5424.stock SET s_quantity = ? WHERE s_w_id = ? AND s_i_id = ?"
 
 update_stock_ytd_and_order_cnt = "UPDATE CS5424.stock_counter SET s_ytd_change = s_ytd_change + ?, " \
-                        "s_order_cnt_change = s_order_cnt_change + 1 where s_w_id = ? and s_id = ?"
+                        "s_order_cnt_change = s_order_cnt_change + 1 where s_w_id = ? and s_i_id = ?"
 
 update_stock_remote_cnt_change = "UPDATE CS5424.stock_counter SET s_remote_cnt_change = s_remote_cnt_change + 1 " \
                           "WHERE s_w_id = ? and s_i_id = ?"
@@ -19,7 +19,7 @@ update_customer_payment_counters = "UPDATE CS5424.customer_counter SET c_balance
                            "where c_w_id = ? AND c_d_id = ? AND c_id = ?"
 
 update_customer_delivery_counters = "UPDATE CS5424.customer_counter SET c_balance_change = c_balance_change + ?, " \
-                                    "c_delivery_cnt_change = c_delivery_cnt_change + 1" \
+                                    "c_delivery_cnt_change = c_delivery_cnt_change + 1 " \
                                     "WHERE c_w_id = ? and c_d_id = ? and c_id = ?"
 
 update_order_carrier_id = "UPDATE CS5424.orders SET o_carrier_id = ? WHERE o_w_id = ? and o_d_id = ? and o_id = ?"
@@ -74,7 +74,7 @@ select_customer_order = "SELECT * FROM CS5424.customer_order WHERE co_w_id = ? A
 
 select_related_customer = "SELECT * FROM CS5424.related_customer where w_id = ? AND d_id = ? AND c_id = ?"
 
-select_district_o_id_change = "SELECT * FROM CS5424.district_counter where d_w_id = ? d_id = ?"
+select_district_o_id_change = "SELECT * FROM CS5424.district_counter where d_w_id = ? AND d_id = ?"
 
 insert_related_customer = "INSERT INTO CS5424.related_customer(w_id, d_id, c_id, r_w_id, " \
                         "r_d_id, r_c_id) VALUES(?, ?, ?, ?, ?, ?)"

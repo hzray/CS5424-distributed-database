@@ -1,3 +1,5 @@
+import decimal
+
 import cassandra
 from cassandra.cluster import Cluster, ExecutionProfile, EXEC_PROFILE_DEFAULT
 
@@ -12,13 +14,13 @@ def main():
     query = "select sum(w_ytd) from cs5424.warehouse"
     sum_w_ytd = session.execute(query, []).one().system_sum_w_ytd
     query = "select sum(w_ytd_change) from cs5424.warehouse_counter"
-    sum_w_ytd += session.execute(query, []).one().system_sum_w_ytd_change
+    sum_w_ytd += session.execute(query, []).one().system_sum_w_ytd_change / decimal.Decimal(100)
     print("sum(W_YTD) = {}".format(sum_w_ytd))
 
     query = "select sum(d_ytd) from cs5424.district"
     sum_d_ytd = session.execute(query, []).one().system_sum_d_ytd
-    query = "select sum(d_ytd_change) from cs5424.district_counter"
-    sum_d_ytd += session.execute(query, []).one().system_sum_d_ytd_change
+    query = "select sum(d_ydt_change) from cs5424.district_counter"
+    sum_d_ytd += session.execute(query, []).one().system_sum_d_ydt_change / decimal.Decimal(100)
     print("sum(D_YTD) = {}".format(sum_d_ytd))
 
     query = "select sum(d_base_o_id) from cs5424.district"
@@ -28,7 +30,7 @@ def main():
     print("sum(D_NEXT_O_ID) = {}".format(sum_next_o_id))
 
     query = "select sum(c_balance) from cs5424.customer"
-    sum_c_balance = session.execute(query, []).one().system_sum_c_balance
+    sum_c_balance = session.execute(query, []).one().system_sum_c_balance / decimal.Decimal(100)
     print("sum(C_BALANCE) = {}".format(sum_c_balance))
 
     query = "select sum(c_ytd_payment) from cs5424.customer"
