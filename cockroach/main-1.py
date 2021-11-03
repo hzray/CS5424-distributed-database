@@ -5,7 +5,7 @@ import Delivery
 import Payment
 import OrderStatus
 import StockLevel
-import PopularItem
+import PopularItem1
 import RelatedCustomer
 import TopBalance
 import psycopg2
@@ -30,7 +30,8 @@ def driver(line, lines, conn, po, max_retries=3):
             if command == 'N':
                 with open(po + 'NewOrderOutPut.txt', 'a+') as fo:
                     new_order = NewOrder.NewOrder(conn, args[1], args[2], args[3], args[4], fo)
-                    new_order.new_order_input(lines, args[4])
+                    if retry == 0:
+                        new_order.new_order_input(lines, args[4])
                     new_order.new_order_handler()
             elif command == 'P':
                 with open(po + 'PaymentOutPut.txt', 'a+') as fo:
@@ -49,7 +50,7 @@ def driver(line, lines, conn, po, max_retries=3):
                     stock_level.stock_level_handler()
             elif command == 'I':
                 with open(po + 'PopularItemOutPut.txt', 'a+') as fo:
-                    popular_item = PopularItem.PopularItem(conn, args[1], args[2], args[3], fo)
+                    popular_item = PopularItem1.PopularItem(conn, args[1], args[2], args[3], fo)
                     popular_item.popularItem_handler()
             elif command == 'T':
                 with open(po + 'TopBalanceOutPut.txt', 'a+') as fo:
@@ -88,16 +89,15 @@ class ClientReport:
 
 
 # one client run one txt file
-class ClientThread(threading.Thread):
-    def __init__(self, file_path_i, ipaddress, port, fid, client_reports, file_path_o):
-        threading.Thread.__init__(self)
+class ClientThread:
+    def __init__(self, file_path_i, ipaddress, port, fid, file_path_o):
         self.file_path_i = file_path_i
         self.file_path_o = file_path_o
         self.ipaddress = ipaddress
         self.port = port
         self.fid = fid
         self.latencies = []
-        self.client_reports = client_reports
+
         self.Latency = {'N': [], 'P': [], 'D': [], 'O': [], 'S': [], 'I': [], 'T': [], 'R': []}
 
     def run(self):
@@ -117,10 +117,8 @@ class ClientThread(threading.Thread):
                     args = line.split(',')
                     nlines = []
                     if args[0] == 'N':
-                        begin = index+1
-                        end = index+int(args[4])+1
-                        nlines = lines[begin:end]
-                        # print(nlines)
+                        for ni in range(index + 1, index + 1 + int(args[4])):
+                            nlines.append(lines[ni])
                         index += int(args[4])
                     global success
                     success = False
@@ -139,6 +137,7 @@ class ClientThread(threading.Thread):
                     now_end = time.time()
                     print("{}. Transaction {} {} at {} s".format(self.fid, str(t_number),
                                                                  args[0], str(now_end - total_start)))
+
                 if t_number >= 100:
                     break
         total_end = time.time()
@@ -155,6 +154,11 @@ class ClientThread(threading.Thread):
               "average_latency: {}, median_latency: {}, latency_95th: {}, latency_99th: {}". \
               format(self.fid, t_number, total_latency, throughput, average_latency,
                      median_latency, latency_95th, latency_99th))
+
+        with open(self.file_path_o + 'clients.csv', 'a+', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([self.fid, t_number, total_latency, throughput, average_latency,
+                             median_latency, latency_95th, latency_99th])
 
         print("N average: {}\n"
               "P average: {}\n"
@@ -173,8 +177,6 @@ class ClientThread(threading.Thread):
             np.average(self.Latency['T']),
             np.average(self.Latency['R']),
         ))
-        self.client_reports[self.fid] = ClientReport(t_number, total_latency, throughput, average_latency,
-                                                     median_latency, latency_95th, latency_99th)
 
 
 def parse_cmdline():
@@ -182,49 +184,19 @@ def parse_cmdline():
 
     parser.add_argument('-address', type=str, help='ip address', default='localhost')
     parser.add_argument('-port', type=str, help='port', default='26257')
-    parser.add_argument('-sid', type=str, help='server id', default='0')
+    parser.add_argument('-cid', type=str, help='server id', default='0')
     parser.add_argument('-xfpath', type=str, help='input file A or B',
-                        default='/Users/Administrator/Desktop/cs5424db/project_files/xact_files_A/')
+                        default='/Users/Administrator/Desktop/cs5424db/project_files/')
     parser.add_argument('-rfpath', type=str, help='output report direction',
-                        default='/Users/Administrator/PycharmProjects/CS5424-neliy/cockroach/output/')
+                        default='/Users/Administrator/PycharmProjects/CS5424-neliy/cockroach/')
     opt = parser.parse_args()
     return opt
 
 
-# one server run 8 clients
-class Server:
-    def __init__(self, file_path_i, ipaddress, port, cid, file_path_o):
-        self.file_path_i = file_path_i
-        self.file_path_o = file_path_o
-        self.ipaddress = ipaddress
-        self.port = port
-        self.cid = int(cid)
-
-        self.treads = []
-        self.client_reports = {}
-
-    def run(self):
-        for i in range(self.cid * 8 + 0, self.cid * 8 + 8):
-            self.treads.append(ClientThread(self.file_path_i, self.ipaddress, self.port,
-                                            str(i), self.client_reports, self.file_path_o))
-
-        for t in self.treads:
-            t.start()
-        for t in self.treads:
-            t.join()
-
-        with open(self.file_path_o + 'clients.csv', 'a+', newline='') as file:
-            for k in self.client_reports.keys():
-                writer = csv.writer(file)
-                writer.writerow([k, self.client_reports[k].a, self.client_reports[k].b, self.client_reports[k].c,
-                                 self.client_reports[k].d, self.client_reports[k].e, self.client_reports[k].f,
-                                 self.client_reports[k].g])
-
-
 def main():
     opt = parse_cmdline()
-
-    Server(opt.xfpath, opt.address, opt.port, opt.sid, opt.rfpath).run()
+    # python main-single.py -address='' -port='' -cid='' -xfpath='' -rfpath=''
+    ClientThread(opt.xfpath, opt.address, opt.port, opt.cid, opt.rfpath).run()
 
 
 if __name__ == "__main__":

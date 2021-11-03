@@ -5,7 +5,7 @@ import Delivery
 import Payment
 import OrderStatus
 import StockLevel
-import PopularItem
+import PopularItem1
 import RelatedCustomer
 import TopBalance
 import psycopg2
@@ -50,7 +50,7 @@ def driver(line, lines, conn, po, max_retries=3):
                     stock_level.stock_level_handler()
             elif command == 'I':
                 with open(po + 'PopularItemOutPut.txt', 'a+') as fo:
-                    popular_item = PopularItem.PopularItem(conn, args[1], args[2], args[3], fo)
+                    popular_item = PopularItem1.PopularItem(conn, args[1], args[2], args[3], fo)
                     popular_item.popularItem_handler()
             elif command == 'T':
                 with open(po + 'TopBalanceOutPut.txt', 'a+') as fo:

@@ -1,0 +1,37 @@
+
+1. customer information: w_id: 1, d_id: 1, c_id: 1144, lastname: ATIONOUGHTBAR, credit: GC, discount: 0.3681
+2. warehouse tax rate: 0.1022, district tax rate: 0.1832
+3. order number: 3853, entry date: 2021-11-03 23:27:05.262295
+4. number of items: 7, total amount for order: 0
+5. items information: 
+i_id = 28351, i_name=jeepiwbauliwssommaatpx, i_w_id=1, ol_amount=18.03, s_quantity=19
+i_id = 34981, i_name=obunnbtllietlfrzgadvsd, i_w_id=1, ol_amount=18.01, s_quantity=40
+i_id = 40577, i_name=xycrtthwkbhmbhgozvapiiy, i_w_id=1, ol_amount=38.32, s_quantity=57
+i_id = 57015, i_name=spyboiefrndgosga, i_w_id=1, ol_amount=40.14, s_quantity=89
+i_id = 73381, i_name=ogthbfvggkgcvfuxdqxrlcv, i_w_id=1, ol_amount=197.60, s_quantity=13
+i_id = 77989, i_name=jibiftmraebdryisas, i_w_id=1, ol_amount=136.01, s_quantity=98
+i_id = 89822, i_name=visnhoukbsgiwmxceaxdq, i_w_id=1, ol_amount=104.8, s_quantity=25
+1. customer information: w_id: 1, d_id: 1, c_id: 1144, lastname: ATIONOUGHTBAR, credit: GC, discount: 0.3681
+2. warehouse tax rate: 0.1022, district tax rate: 0.1832
+3. order number: 4067, entry date: 2021-11-03 23:28:34.050653
+4. number of items: 7, total amount for order: 0
+5. items information: 
+i_id = 28351, i_name=jeepiwbauliwssommaatpx, i_w_id=1, ol_amount=18.03, s_quantity=12
+i_id = 34981, i_name=obunnbtllietlfrzgadvsd, i_w_id=1, ol_amount=18.01, s_quantity=37
+i_id = 40577, i_name=xycrtthwkbhmbhgozvapiiy, i_w_id=1, ol_amount=38.32, s_quantity=45
+i_id = 57015, i_name=spyboiefrndgosga, i_w_id=1, ol_amount=40.14, s_quantity=79
+i_id = 73381, i_name=ogthbfvggkgcvfuxdqxrlcv, i_w_id=1, ol_amount=197.60, s_quantity=90
+i_id = 77989, i_name=jibiftmraebdryisas, i_w_id=1, ol_amount=136.01, s_quantity=77
+i_id = 89822, i_name=visnhoukbsgiwmxceaxdq, i_w_id=1, ol_amount=104.8, s_quantity=13
+1. customer information: w_id: 1, d_id: 1, c_id: 1144, lastname: ATIONOUGHTBAR, credit: GC, discount: 0.3681
+2. warehouse tax rate: 0.1022, district tax rate: 0.1832
+3. order number: 4068, entry date: 2021-11-03 23:29:02.012887
+4. number of items: 7, total amount for order: 0
+5. items information: 
+i_id = 28351, i_name=jeepiwbauliwssommaatpx, i_w_id=1, ol_amount=18.03, s_quantity=11
+i_id = 34981, i_name=obunnbtllietlfrzgadvsd, i_w_id=1, ol_amount=18.01, s_quantity=36
+i_id = 40577, i_name=xycrtthwkbhmbhgozvapiiy, i_w_id=1, ol_amount=38.32, s_quantity=41
+i_id = 57015, i_name=spyboiefrndgosga, i_w_id=1, ol_amount=40.14, s_quantity=77
+i_id = 73381, i_name=ogthbfvggkgcvfuxdqxrlcv, i_w_id=1, ol_amount=197.60, s_quantity=85
+i_id = 77989, i_name=jibiftmraebdryisas, i_w_id=1, ol_amount=136.01, s_quantity=70
+i_id = 89822, i_name=visnhoukbsgiwmxceaxdq, i_w_id=1, ol_amount=104.8, s_quantity=109
