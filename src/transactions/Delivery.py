@@ -10,7 +10,15 @@ class DeliveryHandler:
 
     def find_smallest_order(self, w_id, d_id):
         args = [w_id, d_id, -1]
-        return utils.select_one(self.session, self.query.select_order_with_carrier, args)
+        counter = 0
+        while counter < 3:
+            try:
+                order = utils.select_one(self.session, self.query.select_order_with_carrier, args)
+                return order
+            except Exception as e:
+                print(e)
+                counter += 1
+        return None
 
     def update_order_carrier_id(self, w_id, d_id, o_id, carrier_id):
         args = [carrier_id, w_id, d_id, o_id]

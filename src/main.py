@@ -15,6 +15,7 @@ def main():
     if len(sys.argv) < 3:
         sys.exit('Must pass workload number and client number')
 
+
     workload = sys.argv[1]
     client_id = sys.argv[2]
     cons_level = sys.argv[3]

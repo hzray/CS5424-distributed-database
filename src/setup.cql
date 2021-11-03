@@ -130,9 +130,12 @@ CREATE TABLE IF NOT EXISTS CS5424.customer_order_items (
   coi_c_id int,
   coi_o_id int,
   coi_i_id int,
-  PRIMARY KEY ((coi_w_id, coi_d_id), coi_i_id, coi_c_id, coi_o_id)
+  PRIMARY KEY ((coi_w_id, coi_d_id), coi_c_id, coi_o_id, coi_i_id)
 )
-WITH CLUSTERING ORDER BY (coi_i_id ASC, coi_c_id ASC, coi_o_id ASC);
+WITH CLUSTERING ORDER BY (coi_c_id ASC, coi_o_id ASC, coi_i_id ASC);
+
+CREATE INDEX IF NOT EXISTS item_index
+  ON CS5424.customer_order_items (coi_i_id);
 
 CREATE TABLE IF NOT EXISTS CS5424.customer_order (
     co_w_id int,
