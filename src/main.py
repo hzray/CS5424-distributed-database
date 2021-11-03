@@ -17,8 +17,8 @@ def main():
 
 
     workload = sys.argv[1]
-    client_id = sys.argv[2]
-    cons_level = sys.argv[3]
+    cons_level = sys.argv[2]
+    client_id = sys.argv[3]
     if cons_level == 'ROWA':
         read_profile = ExecutionProfile(consistency_level=ConsistencyLevel.ONE, request_timeout=1000.0)
         write_profile = ExecutionProfile(consistency_level=ConsistencyLevel.ALL, request_timeout=1000.0)
