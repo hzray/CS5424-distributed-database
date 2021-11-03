@@ -4,7 +4,7 @@ update_district_o_id_counter = "UPDATE CS5424.district_counter SET d_o_id_change
 update_stock_quantity = "UPDATE CS5424.stock SET s_quantity = ? WHERE s_w_id = ? AND s_i_id = ?"
 
 update_stock_ytd_and_order_cnt = "UPDATE CS5424.stock_counter SET s_ytd_change = s_ytd_change + ?, " \
-                        "s_order_cnt_change = s_order_cnt_change + 1 where s_w_id = ? and s_id = ?"
+                        "s_order_cnt_change = s_order_cnt_change + 1 where s_w_id = ? and s_i_id = ?"
 
 update_stock_remote_cnt_change = "UPDATE CS5424.stock_counter SET s_remote_cnt_change = s_remote_cnt_change + 1 " \
                           "WHERE s_w_id = ? and s_i_id = ?"
