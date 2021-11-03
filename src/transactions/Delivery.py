@@ -10,7 +10,15 @@ class DeliveryHandler:
 
     def find_smallest_order(self, w_id, d_id):
         args = [w_id, d_id, -1]
-        return utils.select_one(self.session, self.query.select_order_with_carrier, args)
+        counter = 0
+        while counter < 3:
+            try:
+                order = utils.select_one(self.session, self.query.select_order_with_carrier, args)
+                return order
+            except Exception as e:
+                print(e)
+                counter += 1
+        return None
 
     def update_order_carrier_id(self, w_id, d_id, o_id, carrier_id):
         args = [carrier_id, w_id, d_id, o_id]
@@ -24,14 +32,6 @@ class DeliveryHandler:
         args = [t, w_id, d_id, o_id, ol_number]
         utils.update(self.session, self.query.update_ol_deliver_d, args)
 
-    def update_customer(self, w_id, d_id, c_id, balance, cnt):
-        args = [balance, cnt, w_id, d_id, c_id]
-        utils.update(self.session, self.query.update_customer_delivery, args)
-
-    def select_customer(self, w_id, d_id, c_id):
-        args = [w_id, d_id, c_id]
-        return utils.select_one(self.session, self.query.select_customer, args)
-
     def sum_order_amount(self, w_id, d_id, o_id):
         args = [w_id, d_id, o_id]
         rows = utils.select(self.session, self.query.select_ol, args)
@@ -40,13 +40,10 @@ class DeliveryHandler:
             amount += row.ol_amount
         return amount
 
-    def select_and_update_customer(self, w_id, d_id, c_id, o_id):
-
-        customer = self.select_customer(w_id, d_id, c_id)
-        balance = customer.c_balance
-        delivery_cnt = customer.c_delivery_cnt
+    def update_customer(self, w_id, d_id, c_id, o_id):
         total_order_amount = self.sum_order_amount(self.w_id, d_id, o_id)
-        self.update_customer(w_id, d_id, customer.c_id, balance + total_order_amount, delivery_cnt + 1)
+        args = [total_order_amount, w_id, d_id, c_id]
+        utils.update(self.session, self.query.update_customer_delivery_change, args)
 
     def run(self):
         for d_id in range(1, 11):
@@ -62,4 +59,4 @@ class DeliveryHandler:
                 self.update_delivery_d(self.w_id, d_id, o_id, ol.ol_number, datetime.now())
 
             # select and update customer
-            return self.select_and_update_customer(self.w_id, d_id, smallest_order.o_c_id, o_id)
+            return self.update_customer(self.w_id, d_id, smallest_order.o_c_id, o_id)

@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS CS5424.district (
   D_ZIP text,
   D_TAX decimal,
   D_YTD decimal,
-  D_NEXT_O_ID int,
+  D_BASE_O_ID int,
   PRIMARY KEY (D_W_ID, D_ID)
 )
 WITH CLUSTERING ORDER BY (D_ID ASC);
@@ -130,9 +130,12 @@ CREATE TABLE IF NOT EXISTS CS5424.customer_order_items (
   coi_c_id int,
   coi_o_id int,
   coi_i_id int,
-  PRIMARY KEY ((coi_w_id, coi_d_id), coi_i_id, coi_c_id, coi_o_id)
+  PRIMARY KEY ((coi_w_id, coi_d_id), coi_c_id, coi_o_id, coi_i_id)
 )
-WITH CLUSTERING ORDER BY (coi_i_id ASC, coi_c_id ASC, coi_o_id ASC);
+WITH CLUSTERING ORDER BY (coi_c_id ASC, coi_o_id ASC, coi_i_id ASC);
+
+CREATE INDEX IF NOT EXISTS item_index
+  ON CS5424.customer_order_items (coi_i_id);
 
 CREATE TABLE IF NOT EXISTS CS5424.customer_order (
     co_w_id int,
@@ -154,6 +157,45 @@ CREATE TABLE IF NOT EXISTS CS5424.related_customer (
   PRIMARY KEY ((w_id, d_id), c_id)
 )
 WITH CLUSTERING ORDER BY (c_id ASC);
+
+
+CREATE TABLE CS5424.warehouse_counter (
+  W_ID int,
+  W_YTD_CHANGE counter,
+  PRIMARY KEY (W_ID)
+);
+
+CREATE TABLE CS5424.district_counter (
+  D_W_ID int,
+  D_ID int,
+  D_O_ID_CHANGE counter,
+  D_YDT_CHANGE counter,
+  PRIMARY KEY ((D_W_ID, D_ID))
+);
+
+CREATE TABLE CS5424.stock_counter (
+  S_W_ID int,
+  S_I_ID int,
+  S_YTD_CHANGE counter,
+  S_ORDER_CNT_CHANGE counter,
+  S_REMOTE_CNT_CHANGE counter,
+  PRIMARY KEY (S_W_ID, S_I_ID)
+)
+WITH CLUSTERING ORDER BY (S_I_ID ASC);
+
+CREATE TABLE CS5424.customer_counter (
+  C_W_ID int,
+  C_D_ID int,
+  C_ID int,
+  C_BALANCE_CHANGE counter,
+  C_YTD_PAYMENT_CHANGE counter,
+  C_PAYMENT_CNT_CHANGE counter,
+  C_DELIVERY_CNT_CHANGE counter,
+  PRIMARY KEY ((C_W_ID, C_D_ID), C_ID)
+)
+WITH CLUSTERING ORDER BY (C_ID ASC);
+
+
 
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS CS5424.customer_balance

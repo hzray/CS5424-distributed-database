@@ -16,44 +16,38 @@ class PaymentHandler:
         args = [w_id]
         return utils.select_one(self.session, self.query.select_warehouse, args)
 
-    def update_warehouse_ytd(self, w_id, ytd):
-        args = [ytd, w_id]
-        utils.update(self.session, self.query.update_warehouse_ytd, args)
+    def update_warehouse_ytd_change(self, w_id, payment):
+        args = [payment, w_id]
+        utils.update(self.session, self.query.update_warehouse_ytd_change, args)
 
     def select_district(self, w_id, d_id):
         args = [w_id, d_id]
         return utils.select_one(self.session, self.query.select_district, args)
 
-    def update_district_ytd(self, w_id, d_id, ytd):
-        args = [ytd, w_id, d_id]
-        utils.update(self.session, self.query.update_district_ytd, args)
+    def update_district_ytd_change(self, w_id, d_id, payment):
+        args = [payment, w_id, d_id]
+        utils.update(self.session, self.query.update_district_ytd_change, args)
 
     def select_customer(self, w_id, d_id, c_id):
         args = [w_id, d_id, c_id]
         return utils.select_one(self.session, self.query.select_customer, args)
 
-    def update_customer(self, w_id, d_id, c_id, balance, ytd_payment, payment_cnt):
-        args = [balance, ytd_payment, payment_cnt, w_id, d_id, c_id]
-        utils.update(self.session, self.query.update_customer_payment, args)
-
-    def select_and_update_customer(self, w_id, d_id, c_id):
-        customer = self.select_customer(w_id, d_id, c_id)
-        self.update_customer(w_id, d_id, c_id, customer.c_balance - self.payment,
-                             customer.c_ytd_payment + self.payment, customer.c_payment_cnt + 1)
-        customer = self.select_customer(w_id, d_id, c_id)
-        return customer
+    def update_customer_counters(self, w_id, d_id, c_id, payment):
+        args = [payment, payment, w_id, d_id, c_id]
+        utils.update(self.session, self.query.update_customer_payment_counters, args)
 
     def run(self):
         # Step 1
         warehouse = self.select_warehouse(self.w_id)
-        self.update_warehouse_ytd(self.w_id, warehouse.w_ytd + self.payment)
+        self.update_warehouse_ytd_change(self.w_id, self.payment)
 
         # Step 2
         district = self.select_district(self.w_id, self.d_id)
-        self.update_district_ytd(self.w_id, self.d_id, district.d_ytd + self.payment)
+        self.update_district_ytd_change(self.w_id, self.d_id, self.payment)
 
         # Step 3
-        customer = self.select_and_update_customer(self.w_id, self.d_id, self.c_id)
+        customer = self.select_customer(self.w_id, self.d_id, self.c_id)
+        self.update_customer_counters(self.w_id, self.d_id, self.c_id, self.payment)
 
         # Output
         customer_output = "customer: W_ID = {}, D_ID = {}, C_ID = {}, C_FIRST = {}, C_MIDDLE = {}, C_LAST = {}, " \
@@ -63,7 +57,7 @@ class PaymentHandler:
                     customer.c_last,
                     customer.c_street_1, customer.c_street_2, customer.c_city, customer.c_state, customer.c_zip,
                     customer.c_phone, customer.c_since, customer.c_credit, customer.c_credit_lim,
-                    customer.c_discount, customer.c_balance)
+                    customer.c_discount, customer.c_balance-self.payment)
 
         print(customer_output)
 
