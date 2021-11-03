@@ -38,24 +38,24 @@ class NewOrderHandler:
         self.c_id = int(c_id)
         self.n_item = int(n_item)
 
-    def select_and_update_district(self, w_id, d_id):
-        district = self.select_district(w_id, d_id)
-        o_id = district.d_next_o_id
-        args = [o_id + 1, w_id, d_id]
-        utils.update(self.session, self.query.update_next_o_id, args)
-        return district
+    def update_district_o_id_counter(self, w_id, d_id):
+        args = [w_id, d_id]
+        utils.update(self.session, self.query.update_d_o_id_counter, args)
 
     def update_stock(self, stock, w_id, quantity):
         qty = stock.s_quantity - quantity
         if qty < 10:
             qty += 100
-        ytd = stock.s_ytd + quantity
-        order_cnt = stock.s_order_cnt + 1
-        remote_cnt = stock.s_remote_cnt
+        # update stock quantity
+        args = [qty, stock.s_w_id, stock.s_i_id]
+        utils.update(self.session, self.query.update_stock_quantity, args)
+
+        # update counters
+        args = [quantity, stock.s_w_id, stock.s_i_id]
+        utils.update(self.session, self.query.update_stock_ytd_and_order_cnt, args)
         if w_id != stock.s_w_id:
-            remote_cnt += 1
-        args = [qty, ytd, order_cnt, remote_cnt, stock.s_w_id, stock.s_i_id]
-        utils.update(self.session, self.query.update_stock, args)
+            args = [stock.s_w_id, stock.s_i_id]
+            utils.update(self.session, self.query.inc_stock_remote_cnt, args)
         return qty
 
     def insert_order_line(self, w_id, d_id, o_id, i, i_id, t, sup_id, qty, item_amount, dist_info):
@@ -69,6 +69,11 @@ class NewOrderHandler:
     def select_district(self, w_id, d_id):
         args = [w_id, d_id]
         return utils.select_one(self.session, self.query.select_district, args)
+
+    def select_district_o_id_change(self, w_id, d_id):
+        args = [w_id, d_id]
+        district = utils.select_one(self.session, self.query.select_district_o_id_change, args)
+        return district.d_o_id_change
 
     def select_item(self, i_id):
         args = [i_id]
@@ -121,10 +126,9 @@ class NewOrderHandler:
     def run(self):
         items = new_order_input_helper(self.n_item)
         # Step 1 and 2
-
-        district = self.select_and_update_district(self.w_id, self.d_id)
-
-        o_id = district.d_next_o_id
+        district = self.select_district(self.w_id, self.d_id)
+        o_id = district.d_base_o_id + self.select_district_o_id_change(self.w_id, self.d_id)
+        self.update_district_o_id_counter(self.w_id, self.d_id)
 
         # Step 3
         all_local = 1
