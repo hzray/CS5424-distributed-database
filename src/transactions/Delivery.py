@@ -42,7 +42,7 @@ class DeliveryHandler:
 
     def update_customer(self, w_id, d_id, c_id, o_id):
         total_order_amount = self.sum_order_amount(self.w_id, d_id, o_id)
-        args = [100*(round(total_order_amount, 2)), w_id, d_id, c_id]
+        args = [int(100*(round(total_order_amount, 2))), w_id, d_id, c_id]
         utils.update(self.session, self.query.update_customer_delivery_change, args)
 
     def run(self):

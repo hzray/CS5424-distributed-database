@@ -34,7 +34,7 @@ def main():
         exec_profile = {'read': read_profile, 'write': write_profile}
 
 
-    cluster = Cluster(['127.0.0.1'], 6042, execution_profiles=exec_profile)
+    cluster = Cluster(['127.0.0.1'], 9042, execution_profiles=exec_profile)
     session = cluster.connect()
     query = PreparedQuery(session)
 

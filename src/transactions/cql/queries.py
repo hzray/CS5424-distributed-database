@@ -41,9 +41,6 @@ insert_order = "INSERT INTO " \
 insert_customer_order_items = "INSERT INTO CS5424.customer_order_items(coi_w_id, coi_d_id, coi_c_id, coi_o_id, " \
                               "coi_i_id) VALUES(?, ?, ?, ?, ?)"
 
-insert_customer_order = "INSERT INTO CS5424.customer_order(co_w_id, co_d_id, co_c_id, co_o_id, " \
-                        "co_i_ids) VALUES(?, ?, ?, ?, ?)"
-
 select_district = "SELECT * FROM CS5424.district WHERE d_w_id = ? AND d_id = ?"
 
 select_item = "SELECT * FROM CS5424.item WHERE i_id = ?"
@@ -58,19 +55,19 @@ select_order_with_carrier = "SELECT * FROM CS5424.orders WHERE o_w_id = ? and o_
 
 select_order_line = "SELECT * FROM CS5424.order_line WHERE ol_w_id = ? and ol_d_id = ? and ol_o_id = ?"
 
-select_order_with_customer = "SELECT * FROM CS5424.orders_customer WHERE o_w_id = ? AND o_d_id = ? AND o_c_id = ?"
+select_order_with_customer = "SELECT * FROM CS5424.orders_customer_mv WHERE o_w_id = ? AND o_d_id = ? AND o_c_id = ?"
 
 select_order_line_in_range = "SELECT * FROM CS5424.order_line where ol_w_id = ? and ol_d_id = ? and ol_o_id >= ? and ol_o_id < ?"
 
 select_order_in_range = "SELECT * FROM CS5424.orders WHERE o_w_id = ? AND o_d_id = ? AND o_id >= ? AND o_id < ?"
 
-select_customer_sort_by_balance = "SELECT * FROM CS5424.customer_balance WHERE c_w_id = ? AND c_d_id = ? LIMIT ?"
+select_customer_sort_by_balance = "SELECT * FROM CS5424.customer_balance_mv WHERE c_w_id = ? AND c_d_id = ? LIMIT ?"
 
-select_customer_order_items = "SELECT * FROM CS5424.customer_order_items WHERE coi_w_id = ? AND coi_d_id = ? AND coi_i_id in ?"
+select_customer_order_items_in = "SELECT * FROM CS5424.customer_order_items_mv WHERE coi_w_id = ? AND coi_d_id = ? AND coi_i_id in ?"
 
 select_customer_by_district = "SELECT * FROM CS5424.customer WHERE c_w_id = ? AND c_d_id = ?"
 
-select_customer_order = "SELECT * FROM CS5424.customer_order WHERE co_w_id = ? AND co_d_id = ? AND co_c_id = ?"
+select_customer_order_items = "SELECT * FROM CS5424.customer_order_items WHERE coi_w_id = ? AND coi_d_id = ? AND coi_c_id = ?" \
 
 select_related_customer = "SELECT * FROM CS5424.related_customer where w_id = ? AND d_id = ? AND c_id = ?"
 
