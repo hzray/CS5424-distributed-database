@@ -49,7 +49,7 @@ def main():
 
     query = "select sum(c_delivery_cnt) from cs5424.customer"
     sum_c_delivery_cnt = session.execute(query, []).one().system_sum_c_delivery_cnt
-    query = "select sum(c_delivery_count_change) from cs5424.customer_counter"
+    query = "select sum(c_delivery_cnt_change) from cs5424.customer_counter"
     sum_c_delivery_cnt += session.execute(query, []).one().system_sum_c_delivery_cnt_change
     print("sum(C_DELIVERY_CNT) = {}".format(sum_c_delivery_cnt))
 
