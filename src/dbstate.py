@@ -19,7 +19,7 @@ def main():
 
     query = "select sum(d_ytd) from cs5424.district"
     sum_d_ytd = session.execute(query, []).one().system_sum_d_ytd
-    query = "select sum(d_ydt_change) from cs5424.district_counter"
+    query = "select sum(d_ytt_change) from cs5424.district_counter"
     sum_d_ytd += session.execute(query, []).one().system_sum_d_ytd_change / decimal.Decimal(100)
     print("sum(D_YTD) = {}".format(sum_d_ytd))
 
