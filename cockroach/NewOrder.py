@@ -110,7 +110,7 @@ class NewOrder:
         self.total_amount = 0
         sql_str = "UPSERT INTO CS5424.stock (S_W_ID, S_I_ID, S_QUANTITY, S_YTD, S_ORDER_CNT, S_REMOTE_CNT) "
         sql_str1 = "INSERT INTO CS5424.order_line (OL_O_ID, OL_D_ID, OL_W_ID, OL_NUMBER, " \
-                   "OL_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, OL_DELIVERY_D, OL_DIST_INFO) "
+                   "OL_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, OL_DELIVERY_D, OL_DIST_INFO, OL_I_NAME) "
         stock_num = 0
         for i in range(0, len(self.i_id_set)):
             if i not in self.stock_dic.keys():
@@ -146,13 +146,13 @@ class NewOrder:
                     format(w_id, i_id, ad_quantity, s_ytd, s_order_cnt, s_remote_cnt)
 
             if i != 0:
-                sql_str1 += ", ({}, {}, {}, {}, {}, {}, {}, {}, '{}', '{}')". \
+                sql_str1 += ", ({}, {}, {}, {}, {}, {}, {}, {}, '{}', '{}', {})". \
                     format(self.o_id, self.d_id, self.w_id, i, i_id, i_w_id,
-                           i_quantity, i_amount, '1970-01-01 00:00:00', ol_dist_info)
+                           i_quantity, i_amount, '1970-01-01 00:00:00', ol_dist_info, i_name)
             else:
-                sql_str1 += "VALUES ({}, {}, {}, {}, {}, {}, {}, {}, '{}', '{}')". \
+                sql_str1 += "VALUES ({}, {}, {}, {}, {}, {}, {}, {}, '{}', '{}', {})". \
                     format(self.o_id, self.d_id, self.w_id, i, i_id, i_w_id,
-                           i_quantity, i_amount, '1970-01-01 00:00:00', ol_dist_info)
+                           i_quantity, i_amount, '1970-01-01 00:00:00', ol_dist_info, i_name)
 
             self.output_str += "\ni_id = {}, i_name={}, i_w_id={}, ol_amount={}, s_quantity={}". \
                 format(i_id, i_name, i_w_id, i_amount, s_quantity)

@@ -1,27 +1,18 @@
-import time
-import psycopg2
-import random
-
 
 class TopBalance:
     def __init__(self, conn, fo):
         self.conn = conn
+        self.customers = []
+        self.w_id = []
+        self.d_id = []
         self.warehouse = {}
         self.district = {}
-        self.customers = []
         self.fo = fo
 
     def topBalance_handler(self):
-        warehouse_names = self.select_warehouse()
-        for name in warehouse_names:
-            self.warehouse[name[0]] = name[1]
-
-        district_names = self.select_district()
-        for name in district_names:
-            key_str = str(name[0]) + ',' + str(name[1])
-            self.district[key_str] = name[2]
-
-        self.customers = self.find_top_ten_customers()
+        self.find_top_ten_customers()
+        self.select_warehouse()
+        self.select_district()
         # output
         for customer in self.customers:
             w_id = customer[0]
@@ -43,25 +34,32 @@ class TopBalance:
         with self.conn.cursor() as cur:
             cur.execute("SET TRANSACTION AS OF SYSTEM TIME '-0.1s'")
             cur.execute(
-                "Select c_w_id, c_d_id, c_first, c_middle, c_last, c_balance from CS5424.customer order by "
+                "Select c_w_id, c_d_id, c_first, c_middle, c_last, c_balance, c_id from CS5424.customer order by "
                 "c_balance desc limit %s",
                 [10])
             rows = cur.fetchall()
-            self.conn.commit()
-            return rows
+        self.conn.commit()
+        for row in rows:
+            self.customers.append(row)
+            self.w_id.append(row[0])
+            self.d_id.append(row[1])
 
     def select_warehouse(self):
         with self.conn.cursor() as cur:
             cur.execute("SET TRANSACTION AS OF SYSTEM TIME '-0.1s'")
-            cur.execute("Select w_id, w_name from CS5424.warehouse")
+            cur.execute("Select w_id, w_name from CS5424.warehouse WHERE W_ID IN %s", (tuple(self.w_id),))
             rows = cur.fetchall()
-            self.conn.commit()
-            return rows
+        self.conn.commit()
+        for row in rows:
+            self.warehouse[row[0]] = row[1]
 
     def select_district(self):
         with self.conn.cursor() as cur:
             cur.execute("SET TRANSACTION AS OF SYSTEM TIME '-0.1s'")
-            cur.execute("Select d_w_id, d_id, d_name from CS5424.district")
+            cur.execute("Select d_w_id, d_id, d_name from CS5424.district "
+                        "WHERE D_ID IN %s AND D_W_ID IN %s", (tuple(self.d_id), tuple(self.w_id)))
             rows = cur.fetchall()
-            self.conn.commit()
-            return rows
+        self.conn.commit()
+        for row in rows:
+            key = str(row[0])+','+str(row[1])
+            self.district[key] = row[2]

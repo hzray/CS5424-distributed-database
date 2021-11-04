@@ -1,6 +1,3 @@
-import time
-import psycopg2
-import random
 
 class StockLevel:
     def __init__(self, conn, w_id, d_id, t, l, fo):

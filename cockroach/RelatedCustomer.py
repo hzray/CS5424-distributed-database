@@ -1,6 +1,3 @@
-import time
-import psycopg2
-import random
 
 class RelatedCustomer:
     def __init__(self, conn, c_w_id, c_d_id, c_id, fo):
