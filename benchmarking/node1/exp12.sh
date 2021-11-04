@@ -16,5 +16,5 @@ fi
 for cid in {0..39..5}
 do
     echo "Excuting Client $cid.txt for Workload $WORKLOAD"
-    python3 $SCRIPT_PATH $WORKLOAD $cid  < $XACT_FILE_DIR$cid.txt $CONS_LVL > ${cid}_performance_${WORKLOAD}.txt &
+    python3 $SCRIPT_PATH $WORKLOAD $CONS_LVL $cid < $XACT_FILE_DIR$cid.txt > ${cid}_performance_${WORKLOAD}.txt &
 done

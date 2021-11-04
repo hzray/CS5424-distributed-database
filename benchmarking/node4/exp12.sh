@@ -2,6 +2,7 @@
 # Node 4 - Exp 1~2
 
 WORKLOAD=$1
+CONS_LVL=$2
 SCRIPT_PATH="/home/stuproj/cs4224m/cs5424_cassandra/src/main.py"
 
 if [ "$WORKLOAD" == "A" ]
@@ -15,5 +16,5 @@ fi
 for cid in {3..39..5}
 do
     echo "Excuting Client $cid.txt for Workload $WORKLOAD"
-    python3 $SCRIPT_PATH $WORKLOAD $cid < $XACT_FILE_DIR$cid.txt > ${cid}_performance_${WORKLOAD}.txt &
+    python3 $SCRIPT_PATH $WORKLOAD $CONS_LVL $cid < $XACT_FILE_DIR$cid.txt > ${cid}_performance_${WORKLOAD}.txt &
 done

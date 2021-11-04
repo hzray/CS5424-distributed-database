@@ -2,18 +2,19 @@
 # Node 1 - Exp 1~2
 
 WORKLOAD=$1
-SCRIPT_PATH="/home/stuproj/cs4224m/cs5424_cassandra/src/main.py"
+# SCRIPT_PATH="/home/stuproj/cs4224m/cs5424_cassandra/src/main.py"
+SCRIPT_PATH="../src/main.py"
 
 if [ "$WORKLOAD" == "A" ]
 then
-	XACT_FILE_DIR="/temp/project_files/project_files_cassandra/xact_files_A/"
+	XACT_FILE_DIR="../../xact_files_A/"
 else
-	XACT_FILE_DIR="/temp/project_files/project_files_cassandra/xact_files_B/"
+	XACT_FILE_DIR="../../xact_files_B/"
 fi
 
 # echo ${XACT_FILE_DIR} 
-for cid in {0..39..5}
+for cid in {0..39..39}
 do
     echo "Excuting Client $cid.txt for Workload $WORKLOAD"
-    # python3 $SCRIPT_PATH $WORKLOAD $cid < $XACT_FILE_DIR$cid.txt
+    python $SCRIPT_PATH $WORKLOAD $cid < $XACT_FILE_DIR$cid.txt
 done
