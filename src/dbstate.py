@@ -19,8 +19,8 @@ def main():
 
     query = "select sum(d_ytd) from cs5424.district"
     sum_d_ytd = session.execute(query, []).one().system_sum_d_ytd
-    query = "select sum(d_ydt_change) from cs5424.district_counter"
-    sum_d_ytd += session.execute(query, []).one().system_sum_d_ydt_change / decimal.Decimal(100)
+    query = "select sum(d_ytd_change) from cs5424.district_counter"
+    sum_d_ytd += session.execute(query, []).one().system_sum_d_ytd_change / decimal.Decimal(100)
     print("sum(D_YTD) = {}".format(sum_d_ytd))
 
     query = "select sum(d_base_o_id) from cs5424.district"
@@ -30,7 +30,9 @@ def main():
     print("sum(D_NEXT_O_ID) = {}".format(sum_next_o_id))
 
     query = "select sum(c_balance) from cs5424.customer"
-    sum_c_balance = session.execute(query, []).one().system_sum_c_balance / decimal.Decimal(100)
+    sum_c_balance = session.execute(query, []).one().system_sum_c_balance
+    query = "select sum(c_balance_change) from cs5424.customer_counter"
+    sum_c_balance += session.execute(query, []).one().system_sum_c_balance_change / decimal.Decimal(100)
     print("sum(C_BALANCE) = {}".format(sum_c_balance))
 
     query = "select sum(c_ytd_payment) from cs5424.customer"
@@ -47,8 +49,8 @@ def main():
 
     query = "select sum(c_delivery_cnt) from cs5424.customer"
     sum_c_delivery_cnt = session.execute(query, []).one().system_sum_c_delivery_cnt
-    query = "select sum(c_delivery_count_change) from cs5424.customer_counter"
-    sum_c_delivery_cnt += session.execute(query, []).one().system_sum_c_delivery_count_change
+    query = "select sum(c_delivery_cnt_change) from cs5424.customer_counter"
+    sum_c_delivery_cnt += session.execute(query, []).one().system_sum_c_delivery_cnt_change
     print("sum(C_DELIVERY_CNT) = {}".format(sum_c_delivery_cnt))
 
     query = "select max(o_id) from cs5424.orders"

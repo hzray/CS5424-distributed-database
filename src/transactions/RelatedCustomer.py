@@ -61,3 +61,6 @@ class RelatedCustomerHandler:
             self.find_related_customers_A(self.w_id, self.d_id, self.c_id)
         elif self.workload == 'B':
             self.find_related_customers_B(self.w_id, self.d_id, self.c_id)
+
+
+
