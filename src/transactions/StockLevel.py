@@ -10,6 +10,15 @@ class StockLevelHandler:
         self.threshold = int(threshold)
         self.n_orders = int(n_orders)
 
+    def select_district_o_id_change(self, w_id, d_id):
+        args = [w_id, d_id]
+        district = utils.select_one(self.session, self.query.select_district_o_id_change, args)
+        if district is None:
+            return 0
+        if district.d_o_id_change is None:
+            return 0
+        return district.d_o_id_change
+
     def select_district(self, w_id, d_id):
         args = [w_id, d_id]
         return utils.select_one(self.session, self.query.select_district, args)
@@ -32,6 +41,6 @@ class StockLevelHandler:
 
     def run(self):
         district = self.select_district(self.w_id, self.d_id)
-        next_o_id = district.d_next_o_id
+        next_o_id = district.d_base_o_id + self.select_district_o_id_change(self.w_id, self.d_id)
         n = self.find_items_from_last_l_orders(self.w_id, self.d_id, next_o_id-self.n_orders, next_o_id)
         print(n)

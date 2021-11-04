@@ -52,7 +52,7 @@ class NewOrderHandler:
 
         # update counters
         args = [quantity, stock.s_w_id, stock.s_i_id]
-        utils.update(self.session, self.query.update_stock_ytd_and_order_cnt, args)
+        utils.update(self.session, self.query.update_stock_ytd_and_order_cnt_counter, args)
         if w_id != stock.s_w_id:
             args = [stock.s_w_id, stock.s_i_id]
             utils.update(self.session, self.query.inc_stock_remote_cnt, args)
@@ -73,6 +73,10 @@ class NewOrderHandler:
     def select_district_o_id_change(self, w_id, d_id):
         args = [w_id, d_id]
         district = utils.select_one(self.session, self.query.select_district_o_id_change, args)
+        if district is None:
+            return 0
+        if district.d_o_id_change is None:
+            return 0
         return district.d_o_id_change
 
     def select_item(self, i_id):
@@ -112,7 +116,7 @@ class NewOrderHandler:
 
     def helper(self, r_w_id, r_d_id, items):
         args = [r_w_id, r_d_id, items]
-        related_order_line = list(utils.select(self.session, self.query.select_customer_order_items, args))
+        related_order_line = list(utils.select(self.session, self.query.select_customer_order_items_in, args))
         o_ids = [row.coi_o_id for row in related_order_line]
         counter = Counter(o_ids)
         related_orders = [c for c in counter if counter[c] >= 2]
@@ -199,10 +203,6 @@ class NewOrderHandler:
         # Insert into customer_order_items
         for item in items:
             self.insert_customer_order_items(self.w_id, self.d_id, self.c_id, o_id, item.Id)
-
-        # Insert into customer_order
-        item_ids = [item.Id for item in items]
-        self.insert_customer_order(self.w_id, self.d_id, self.c_id, o_id, item_ids)
 
         # if workload = B, update related customer
         if self.workload == 'B':
