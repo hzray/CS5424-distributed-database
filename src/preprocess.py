@@ -157,6 +157,7 @@ def createCustomerOrderItemAndCustomerOrder():
 def main():
     preprocessProvidedTable()
     createCustomerOrderItemAndCustomerOrder()
+    # Before doing this, the table customer_order_items and customer_order should have been loaded into cs5424.RAW
     createRelatedCustomer()
 
 
