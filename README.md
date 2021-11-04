@@ -75,7 +75,7 @@ cassandra
 Data preprocessing will take about three hours (mianly becuase of the creation of ***related_customer*** dataset) , we highly recommend to directly use the processed files saved in `/temp/project_files/project_files_cassandra/data_files/`
 
 ~~~bash
-python3 preprocessing.py
+python3 preprocess.py
 ~~~
 
 ### Cassandra Setup and Data Loading
