@@ -75,7 +75,15 @@ cassandra
 Data preprocessing will take about three hours (mianly becuase of the creation of ***related_customer*** dataset) , we highly recommend to directly use the processed files saved in `/temp/project_files/project_files_cassandra/data_files/`
 
 ~~~bash
-python3 preprocess.py
+python3 preprocess_1.py
+~~~
+
+~~~bash
+cqlsh localhost 6042 --request-timeout=100000 -f /home/stuproj/cs4224m/cs5424_cassandra/src/preprocess/load_raw.cql
+~~~
+
+~~~bash
+python3 preprocess_2.py
 ~~~
 
 ### Cassandra Setup and Data Loading
@@ -99,6 +107,7 @@ exp12.sh [workload] [consistency_lvl]
 
 <!--
 Test single transaction:
+
 ~~~bash
 python3 main.py [workload] [consistency_lvl] [client_id] < xact.txt
 ~~~
@@ -115,12 +124,15 @@ When need to test another workload, please run `/benchmarking/resetup.sh` on nod
 First save the dbstate by running `/src/dbstate.py`：
 
 ~~~bash
-dbstate.py > dbstate.txt
+python3 dbstate.py > dbstate.txt
 ~~~
 
 Then run `/src/stackClientMeasurement.py`. You may need to check all the input and output path before generating the result at line 7 - line 11 in `stackClientMeasurement.py`.
 
-It will generated clients.csv, throughput.csv and dbstate.csv.
+It will generated *clients.csv*, *throughput.csv* and *dbstate.csv*.
+
+The generated csv files are saved at  `/measurement/workloadX/`
+
 
 
 
