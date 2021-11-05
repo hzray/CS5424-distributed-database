@@ -123,7 +123,7 @@ Then run `/src/stackClientMeasurement.py`. You may need to check all the input a
 
 It will generated *clients.csv*, *throughput.csv* and *dbstate.csv*.
 
-The generated csv files are saved at  `/measurement/workloadX`
+The generated csv files are saved at  `/measurement/workloadX/`
 
 
 
