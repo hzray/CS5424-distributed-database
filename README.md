@@ -86,19 +86,41 @@ cqlsh localhost 6042 --request-timeout=100000 -f /home/stuproj/cs4224m/cs5424_ca
 
 This will build data model and load data file into database.
 
-#### Start Transaction
+### Start Transaction Experiemnt
+
+Put folders `/benchmarking/node1` to `/benchmarking/node5` into corresponding server (e.g. `xcnc50.comp.nus.edu.sg` to `xcnc54.comp.nus.edu.sg`). Inside which folders lies `exp12.sh`, we have to run these 5 `exp12.sh` at the same time on 5 servers by the same command:
 
 ~~~bash
-python3 main.py [workload] [client_id] < xact.txt
+exp12.sh [workload] [consistency_lvl]
 ~~~
 
 - `workload` = `A` or `B`
+- `consistency_lvl` = `QUORUM` or `ROWA`
+
+<!--
+Test single transaction:
+~~~bash
+python3 main.py [workload] [consistency_lvl] [client_id] < xact.txt
+~~~
+
+- `workload` = `A` or `B`
+- `consistency_lvl` = `QUORUM` or `ROWA`
 - `client_id` in range[0, 39]
+-->
 
+When need to test another workload, please run `/benchmarking/resetup.sh` on node1.
 
+### Measurement Result
 
+First save the dbstate by running `/src/dbstate.py`：
 
+~~~bash
+dbstate.py > dbstate.txt
+~~~
 
+Then run `/src/stackClientMeasurement.py`. You may need to check all the input and output path before generating the result at line 7 - line 11 in `stackClientMeasurement.py`.
+
+It will generated clients.csv, throughput.csv and dbstate.csv.
 
 
 
