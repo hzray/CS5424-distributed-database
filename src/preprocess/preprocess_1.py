@@ -1,12 +1,6 @@
-import time
-from collections import Counter
 
 import pandas as pd
-from cassandra import ConsistencyLevel
-from cassandra.cluster import Cluster, ExecutionProfile
-import multiprocessing
 
-from transactions.cql import utils
 
 DATA_PATH = "/temp/project_files/project_files_cassandra/data_files"
 
