@@ -5,7 +5,6 @@ import time
 from cassandra import ConsistencyLevel
 from cassandra.cluster import ExecutionProfile, Cluster
 import pandas as pd
-
 from src.transactions.cql import utils
 
 DATA_PATH = "/temp/project_files/project_files_cassandra/data_files"
