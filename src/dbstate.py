@@ -89,7 +89,7 @@ def main():
     sum_s_remote_cnt = session.execute(query, []).one().system_sum_s_remote_cnt
     query = "select sum(s_remote_cnt_change) from cs5424.stock_counter"
     sum_s_remote_cnt += session.execute(query, []).one().system_sum_s_remote_cnt_change
-    print("sum(S_YTD) = {}".format(sum_s_remote_cnt))
+    print("sum(S_REMOTE_CNT) = {}".format(sum_s_remote_cnt))
 
 if __name__ == "__main__":
     main()
