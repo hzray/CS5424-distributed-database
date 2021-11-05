@@ -99,6 +99,7 @@ exp12.sh [workload] [consistency_lvl]
 
 <!--
 Test single transaction:
+
 ~~~bash
 python3 main.py [workload] [consistency_lvl] [client_id] < xact.txt
 ~~~
@@ -115,12 +116,15 @@ When need to test another workload, please run `/benchmarking/resetup.sh` on nod
 First save the dbstate by running `/src/dbstate.py`：
 
 ~~~bash
-dbstate.py > dbstate.txt
+python3 dbstate.py > dbstate.txt
 ~~~
 
 Then run `/src/stackClientMeasurement.py`. You may need to check all the input and output path before generating the result at line 7 - line 11 in `stackClientMeasurement.py`.
 
-It will generated clients.csv, throughput.csv and dbstate.csv.
+It will generated *clients.csv*, *throughput.csv* and *dbstate.csv*.
+
+The generated csv files are saved at  `/measurement/workloadX`
+
 
 
 
