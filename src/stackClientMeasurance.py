@@ -51,7 +51,7 @@ with open(DBSTATE_CSV_OUTPUT_DIR + "dbstate.csv", "w", newline='') as out_csv, o
     writer = csv.writer(out_csv)
     lines = f_txt.readlines()
     for line in lines:
-        data = line.split(" = ")
+        data = [line.split(" = ")[1].rstrip()]
         writer.writerow(data)
 
 
