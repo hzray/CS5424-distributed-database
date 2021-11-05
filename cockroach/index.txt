@@ -1,0 +1,109 @@
+CS5424.warehouse
+N 1
+SELECT W_TAX FROM CS5424.warehouse WHERE W_ID = %s
+P 1
+SELECT W_STREET_1, W_STREET_2, W_CITY, W_STATE, W_ZIP  FROM CS5424.warehouse WHERE W_ID = %s
+UPDATE CS5424.warehouse SET W_YTD = W_YTD + %s WHERE W_ID = %s
+T 10
+Select w_id, w_name from CS5424.warehouse WHERE W_ID IN %s
+
+INDEX(W_ID) STORING (W_NAME, W_YTD);
+
+CS5424.district
+N 1
+SELECT D_NEXT_O_ID, D_TAX FROM CS5424.district WHERE D_W_ID = %s AND D_ID = %s
+UPDATE CS5424.district SET D_NEXT_O_ID = D_NEXT_O_ID + %s WHERE D_W_ID = %s AND D_ID = %s
+P 1
+UPDATE CS5424.district SET D_YTD = D_YTD + %s WHERE D_W_ID = %s AND D_ID = %s
+SELECT D_STREET_1, D_STREET_2, D_CITY, D_STATE, D_ZIP  FROM CS5424.district WHERE D_W_ID = %s AND D_ID = %s
+I 1
+Select d_next_o_id from CS5424.district where d_w_id = %s and d_id = %
+S 1
+SELECT D_NEXT_O_ID FROM CS5424.district WHERE D_W_ID = %s AND D_ID = %s
+T 10
+Select d_w_id, d_id, d_name from CS5424.district WHERE D_ID IN %s AND D_W_ID IN %s
+
+INDEX(D_W_ID, D_ID) STORING (D_NAME, D_YTD);
+
+CS5424.customer
+D 1
+UPDATE CS5424.customer SET C_BALANCE = C_BALANCE + %s,  C_DELIVERY_CNT = C_DELIVERY_CNT + %s
+WHERE C_ID = %s AND C_W_ID = %s AND C_D_ID = %s
+N 1
+SELECT C_DISCOUNT, C_LAST, C_CREDIT FROM CS5424.customer
+WHERE C_ID = %s AND C_W_ID = %s AND C_D_ID = %s
+O 1
+SELECT C_FIRST, C_MIDDLE, C_LAST, C_BALANCE FROM CS5424.customer
+WHERE C_W_ID = %s AND C_D_ID = %s AND C_ID = %s
+P 1
+UPDATE CS5424.customer SET C_BALANCE = C_BALANCE + %s, C_YTD_PAYMENT = C_YTD_PAYMENT + %s,  C_PAYMENT_CNT = C_PAYMENT_CNT + %s
+WHERE C_W_ID = %s AND C_D_ID = %s AND C_ID = %s
+SELECT C_FIRST, C_MIDDLE, C_LAST,
+       C_STREET_1, C_STREET_2, C_CITY, C_STATE, C_ZIP,
+       C_PHONE, C_SINCE, C_CREDIT, C_CREDIT_LIM, C_DISCOUNT, C_BALANCE,
+       C_YTD_PAYMENT, C_PAYMENT_CNT FROM CS5424.customer
+       WHERE C_W_ID = %s AND C_D_ID = %s AND C_ID = %s
+I 10
+Select c_id, c_first, c_middle, c_last, c_balance from CS5424.customer
+where c_w_id = %s and c_d_id = %s and c_id in %s
+T ALL
+Select c_w_id, c_d_id, c_first, c_middle, c_last, c_balance, c_id from CS5424.customer order by c_balance desc limit %s
+
+INDEX (C_ID C_W_ID C_D_ID ) STORING (C_FIRST, C_MIDDLE, C_LAST, C_DISCOUNT, C_CREDIT)
+INDEX (C_ID C_W_ID C_D_ID ) STORING (C_LAST, C_DISCOUNT, C_CREDIT)
+
+CS5424.item
+N NUM
+SELECT I_ID, I_PRICE, I_NAME FROM CS5424.item WHERE I_ID IN %s
+INDEX I_ID STORING (I_PRICE, I_NAME)
+
+
+CS5424.orders
+D many
+SELECT MIN(O_ID), O_D_ID FROM CS5424.orders WHERE O_W_ID = %s AND O_CARRIER_ID = %s GROUP BY (O_D_ID)
+UPDATE CS5424.orders SET O_CARRIER_ID = %s WHERE O_ID IN %s AND O_W_ID = %s AND O_D_ID IN %s
+SELECT O_C_ID, O_D_ID FROM CS5424.orders WHERE O_ID IN %s AND O_W_ID = %s AND O_D_ID IN %s
+O 1
+SELECT O_ID, O_ENTRY_D, O_CARRIER_ID FROM CS5424.orders WHERE O_C_ID = %s AND O_W_ID = %s AND O_D_ID = %s
+I L
+Select o_id, o_c_id, o_entry_d from CS5424.orders where o_w_id = %s and o_d_id = %s and o_id in %s
+R
+Select o_id from CS5424.orders where o_w_id = %s and o_d_id = %s and o_c_id = %s
+Select o_c_id from CS5424.orders where o_w_id = %s and o_d_id = %s and o_id = %s
+
+INDEX (O_W_ID, O_D_ID, O_C_ID, O_ID, O_CARRIER_ID) STORING O_ENTRY_D
+
+CS5424.order_line
+D
+UPDATE CS5424.order_line SET OL_DELIVERY_D = %s
+WHERE OL_O_ID IN %s AND OL_W_ID = %s AND OL_D_ID IN %s
+SELECT SUM(OL_AMOUNT), OL_D_ID FROM CS5424.order_line
+WHERE OL_O_ID IN %s AND OL_W_ID = %s AND OL_D_ID IN %s GROUP BY (OL_O_ID, OL_D_ID)
+O
+SELECT OL_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, OL_DELIVERY_D FROM CS5424.order_line
+WHERE OL_W_ID = %s AND OL_D_ID = %s AND OL_O_ID = %s
+P
+Select max(ol_quantity) from CS5424.order_line
+where ol_w_id = %s and ol_d_id = %s and ol_o_id in %s group by ol_o_id
+Select ol_o_id, ol_i_id, ol_quantity, ol_i_name from CS5424.order_line
+where ol_w_id = %s and ol_d_id = %s and ol_quantity in %s"
+R
+Select ol_i_id, ol_o_id from CS5424.order_line
+where ol_w_id = %s and ol_d_id = %s and ol_o_id = %s
+Select ol_w_id, ol_d_id, ol_o_id, sum(1) as Count from CS5424.order_line
+where ol_w_id != %s and ol_i_id in %s group by ol_w_id, ol_d_id, ol_o_id
+S
+SELECT OL_I_ID FROM CS5424.order_line
+WHERE OL_D_ID = %s AND OL_W_ID = %s AND OL_O_ID >= %s AND OL_O_ID < %s
+
+INDEX (OL_W_ID, OL_I_ID, OL_D_ID, OL_O_ID)
+INDEX (OL_W_ID, OL_D_ID, OL_O_ID) STORING (OL_AMOUNT)
+INDEX (OL_W_ID, OL_D_ID, OL_QUANTITY) STORING (OL_I_ID, OL_I_NAME)
+
+CS5424.stock
+N
+SELECT S_I_ID, S_QUANTITY, S_DIST_{}, S_YTD, S_ORDER_CNT, S_REMOTE_CNT FROM CS5424.stock WHERE (S_W_ID = {} AND S_I_ID = {})
+S
+SELECT COUNT(S_QUANTITY) FROM CS5424.stock WHERE S_W_ID = %s AND S_I_ID IN %s AND S_QUANTITY < %s
+
+INDEX (S_W_ID, S_I_ID, S_QUANTITY)

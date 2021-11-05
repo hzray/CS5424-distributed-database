@@ -15,13 +15,9 @@ class RelatedCustomer:
         orders = self.find_orders()
         self.output_str += "\n2. For each customer: "
         for order in orders:
-            items = self.find_items(order[0])
-            related_customers = self.find_related_customers(items)
+            self.find_items(order[0])
+            self.find_related_customers()
 
-            # output:
-            for customer in related_customers:
-                self.output_str += "\nCustomer Identifier: w_id = {}, d_id = {}, c_id = {}".\
-                    format(customer[0], customer[1], customer[2])
         # print(self.output_str, self.fo)
         self.fo.write(self.output_str)
         # print(self.output_str)
@@ -49,34 +45,17 @@ class RelatedCustomer:
                 items.append(row[0])
             return items
 
-    def find_related_customers(self, items):
-        related_customers = []
+    def find_related_customers(self):
         with self.conn.cursor() as cur:
             cur.execute("SET TRANSACTION AS OF SYSTEM TIME '-0.1s'")
             cur.execute(
-                "Select ol_w_id, ol_d_id, ol_o_id, sum(1) as Count from CS5424.order_line where ol_w_id != %s "
-                "and ol_i_id in %s group by ol_w_id, ol_d_id, ol_o_id",
-                [self.c_w_id, tuple(items)])
+                "Select r_w_id, r_d_id, r_c_id from CS5424.related_customer "
+                "where w_id = %s and d_id = %s and c_id = %s",
+                (self.c_w_id, self.c_d_id, self.c_id))
             rows = cur.fetchall()
-            self.conn.commit()
+        self.conn.commit()
 
-            for row in rows:
-                if row[3] >= 2:
-                    c_id = self.find_customer(row[0], row[1], row[2])
-                    customer = (row[0], row[1], c_id[0])
-                    related_customers.append(customer)
-        return set(related_customers)
+        for row in rows:
+            self.output_str += "\nCustomer Identifier: w_id = {}, d_id = {}, c_id = {}". \
+                format(row[0], row[1], row[2])
 
-    def find_customer(self, warehouse_id, district_id, order_id):
-        with self.conn.cursor() as cur:
-            cur.execute("SET TRANSACTION AS OF SYSTEM TIME '-0.1s'")
-            cur.execute(
-                "Select o_c_id from CS5424.orders where o_w_id = %s and o_d_id = %s and o_id = %s",
-                [warehouse_id, district_id, order_id])
-            rows = cur.fetchall()
-            self.conn.commit()
-
-            for row in rows:
-                c_id = row
-
-            return c_id

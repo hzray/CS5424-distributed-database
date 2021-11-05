@@ -54,8 +54,8 @@ class OrderStatus:
         with self.conn.cursor() as cur:
             cur.execute("SET TRANSACTION AS OF SYSTEM TIME '-0.1s'")
             cur.execute("""SELECT O_ID, O_ENTRY_D, O_CARRIER_ID FROM CS5424.orders
-                            WHERE O_C_ID = %s AND O_W_ID = %s AND O_D_ID = %s""",
-                        (self.c_id, self.c_w_id, self.c_d_id))
+                            WHERE O_W_ID = %s AND O_D_ID = %s AND O_C_ID = %s""",
+                        (self.c_w_id, self.c_d_id, self.c_id))
             rows = cur.fetchall()
         self.conn.commit()
         for row in rows:

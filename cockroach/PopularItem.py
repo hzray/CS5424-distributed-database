@@ -61,7 +61,6 @@ class PopularItem:
                 format(row[1], row[2], row[3])
             self.customer_dic [key] = val
 
-
     def get_max_quantity(self):
         with self.conn.cursor() as cur:
             cur.execute(
@@ -77,26 +76,33 @@ class PopularItem:
 
         with self.conn.cursor() as cur:
             cur.execute(
-                "Select ol_o_id, ol_i_id, ol_quantity, ol_i_name from CS5424.order_line where ol_w_id = %s and ol_d_id = %s"
+                "Select ol_o_id, ol_i_id, ol_quantity from CS5424.order_line where ol_w_id = %s and ol_d_id = %s"
                 "and ol_quantity in %s",
                 (self.w_id, self.d_id, tuple(self.ol_max_quan_set)))
             rows = cur.fetchall()
         self.conn.commit()
+        item_id_list = []
+        for row in rows:
+            item_id_list.append(row[1])
+
+        self.select_item(item_id_list)
+
         for row in rows:
             key = row[0]
-            self.ol_p_dic[key] = (row[1], row[2], row[3])
+            i_name = self.item_dic[row[1]]
+            self.ol_p_dic[key] = (row[1], row[2], i_name)
             self.output_str += "\nItem name: i_name = {}, Quantity order: ol_quantity = {}". \
-                format(row[3], row[2])
+                format(i_name, row[2])
 
-    # def select_item(self, item_id_list):
-    #     with self.conn.cursor() as cur:
-    #         cur.execute(
-    #             "Select i_id, i_name from CS5424.item where i_id in %s", (tuple(item_id_list),))
-    #         rows = cur.fetchall()
-    #     self.conn.commit()
-    #     for row in rows:
-    #         key = row[0]
-    #         self.item_dic[key] = row[1]
+    def select_item(self, item_id_list):
+        with self.conn.cursor() as cur:
+            cur.execute(
+                "Select i_id, i_name from CS5424.item where i_id in %s", (tuple(item_id_list),))
+            rows = cur.fetchall()
+        self.conn.commit()
+        for row in rows:
+            key = row[0]
+            self.item_dic[key] = row[1]
 
     def popularItem_handler(self):
         # print("1. District identifier: w_id = {}, d_id = {}".format(self.w_id, self.d_id))

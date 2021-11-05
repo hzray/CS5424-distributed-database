@@ -28,9 +28,9 @@ class StockLevel:
         nl = int(self.n) - int(self.l)
         with self.conn.cursor() as cur:
             cur.execute("SET TRANSACTION AS OF SYSTEM TIME '-0.1s'")
-            cur.execute("""SELECT OL_I_ID FROM CS5424.order_line WHERE OL_D_ID = %s AND OL_W_ID = %s 
+            cur.execute("""SELECT OL_I_ID FROM CS5424.order_line WHERE OL_W_ID = %s AND OL_D_ID = %s 
                             AND OL_O_ID >= %s AND OL_O_ID < %s""",
-                        (self.d_id, self.w_id, str(nl), self.n))
+                        (self.w_id, self.d_id, str(nl), self.n))
             rows = cur.fetchall()
         self.conn.commit()
         for row in rows:

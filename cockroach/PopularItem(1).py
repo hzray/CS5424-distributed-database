@@ -42,14 +42,24 @@ class PopularItem:
                 customer = row
             return customer
 
-    def select_order_lines(self, o_id):
+    def get_max_quantity(self, o_id):
         with self.conn.cursor() as cur:
             cur.execute(
-                "Select ol_i_id, ol_quantity from CS5424.order_line where ol_w_id = %s "
-                "and ol_d_id = %s and ol_o_id = %s order by ol_quantity desc",
+                "Select ol_quantity from CS5424.order_line where ol_w_id = %s and ol_d_id = %s and ol_o_id = %s order by ol_quantity desc limit 1",
                 [self.w_id, self.d_id, o_id])
             rows = cur.fetchall()
             self.conn.commit()
+            return rows
+
+    def select_order_lines(self, o_id):
+        ol_quantity = self.get_max_quantity(o_id)
+        if len(ol_quantity) > 0:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    "Select ol_i_id, ol_quantity from CS5424.order_line where ol_w_id = %s and ol_d_id = %s and ol_o_id = %s and ol_quantity = %s",
+                    [self.w_id, self.d_id, o_id, ol_quantity[0]])
+                rows = cur.fetchall()
+                self.conn.commit()
         return rows
 
     def select_item(self, item_id):
@@ -85,13 +95,9 @@ class PopularItem:
             print("Name of customer: c_first = {}, c_middle = {}, c_last = {}".format(customer[0], customer[1], customer[2]))
 
             order_lines = self.select_order_lines(order[0])
-            popular_item_quantity = -1
+
             for order_line in order_lines:
                 item_id = order_line[0]
-                if popular_item_quantity == -1:
-                    popular_item_quantity = order_line[1]
-                if popular_item_quantity > order_line[1]:
-                    break
                 item = self.select_item(item_id)
                 item_name = item[0]
                 item_count = items.get(item_name) if item_name in items else 0

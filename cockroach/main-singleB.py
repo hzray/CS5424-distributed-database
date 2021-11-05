@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-import NewOrder
+import NewOrderB
 import Delivery
 import Payment
 import OrderStatus
 import StockLevel
-import PopularItem1
-import RelatedCustomer
+import PopularItem
+import RelatedCustomerB
 import TopBalance
 import psycopg2
 import time
@@ -29,7 +29,7 @@ def driver(line, lines, conn, po, max_retries=3):
         try:
             if command == 'N':
                 with open(po + 'NewOrderOutPut.txt', 'a+') as fo:
-                    new_order = NewOrder.NewOrder(conn, args[1], args[2], args[3], args[4], fo)
+                    new_order = NewOrderB.NewOrder(conn, args[1], args[2], args[3], args[4], fo)
                     if retry == 0:
                         new_order.new_order_input(lines, args[4])
                     new_order.new_order_handler()
@@ -50,7 +50,7 @@ def driver(line, lines, conn, po, max_retries=3):
                     stock_level.stock_level_handler()
             elif command == 'I':
                 with open(po + 'PopularItemOutPut.txt', 'a+') as fo:
-                    popular_item = PopularItem1.PopularItem(conn, args[1], args[2], args[3], fo)
+                    popular_item = PopularItem.PopularItem(conn, args[1], args[2], args[3], fo)
                     popular_item.popularItem_handler()
             elif command == 'T':
                 with open(po + 'TopBalanceOutPut.txt', 'a+') as fo:
@@ -58,7 +58,7 @@ def driver(line, lines, conn, po, max_retries=3):
                     top_balance.topBalance_handler()
             elif command == 'R':
                 with open(po + 'RelatedCustomerOutPut.txt', 'a+') as fo:
-                    related_customer = RelatedCustomer.RelatedCustomer(conn, args[1], args[2], args[3], fo)
+                    related_customer = RelatedCustomerB.RelatedCustomer(conn, args[1], args[2], args[3], fo)
                     related_customer.relatedCustomer_handler()
             else:
                 print("command is wrong!" + line)
@@ -138,8 +138,8 @@ class ClientThread:
                     print("{}. Transaction {} {} at {} s".format(self.fid, str(t_number),
                                                                  args[0], str(now_end - total_start)))
 
-                if t_number >= 100:
-                    break
+                # if t_number >= 100:
+                #     break
         total_end = time.time()
         # Close communication with the database.
         conn.close()
@@ -186,9 +186,9 @@ def parse_cmdline():
     parser.add_argument('-port', type=str, help='port', default='26257')
     parser.add_argument('-cid', type=str, help='server id', default='0')
     parser.add_argument('-xfpath', type=str, help='input file A or B',
-                        default='/Users/Administrator/Desktop/cs5424db/project_files/')
+                        default='/Users/Administrator/Desktop/cs5424db/project_files/my_xact/')
     parser.add_argument('-rfpath', type=str, help='output report direction',
-                        default='/Users/Administrator/PycharmProjects/CS5424-neliy/cockroach/')
+                        default='/Users/Administrator/PycharmProjects/CS5424-neliy/cockroach/output/')
     opt = parser.parse_args()
     return opt
 

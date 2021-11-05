@@ -18,9 +18,10 @@ class Customer:
 
     def select_c_info(self, conn):
         with conn.cursor() as cur:
-            cur.execute("SET TRANSACTION AS OF SYSTEM TIME '-0.1s'")
+            # cur.execute("SET TRANSACTION AS OF SYSTEM TIME '-0.1s'")
             cur.execute("SELECT C_DISCOUNT, C_LAST, C_CREDIT FROM CS5424.customer "
-                        "WHERE C_ID = %s AND C_W_ID = %s AND C_D_ID = %s", (self.c_id, self.w_id, self.d_id))
+                        "WHERE C_W_ID = %s AND C_D_ID = %s AND C_ID = %s", (self.w_id, self.d_id, self.c_id))
+            # "WHERE C_ID = %s AND C_W_ID = %s AND C_D_ID = %s", (self.c_id, self.w_id, self.d_id))
             rows = cur.fetchall()
             for row in rows:
                 self.c_discount = row[0]
@@ -75,7 +76,9 @@ class NewOrder:
         # S_YTD + {}, S_ORDER_CNT + {}, S_REMOTE_CNT + {}
         # print(len(self.i_id_set))
         sql_str = ""
-        for idx in range(0, len(self.i_id_set[0])):
+        if len(self.i_id_set) == 0:
+            return
+        for idx in range(0, len(self.i_id_set)):
             if idx == 0:
                 sql_str += "SELECT S_I_ID, S_QUANTITY, S_DIST_{}, S_YTD, S_ORDER_CNT, S_REMOTE_CNT FROM CS5424.stock " \
                            "WHERE (S_W_ID = {} AND S_I_ID = {}) ". \
